@@ -2,14 +2,7 @@
 
 A local AI radio loop: generate ~2-minute songs with [MiniMax Music 3](https://docs.comfy.org/tutorials/audio/minimax/minimax-music-3) in the background, play them with tail fades, and fill gaps with prerecorded interstitials or library tracks until the next song is ready.
 
-Install **`airadio`** from PyPI or from source:
-
-```bash
-pip install airadio
-airadio
-```
-
-Development install:
+Install as **`airadio`** (PyPI-ready; **not published yet**):
 
 ```bash
 git clone https://github.com/Decentricity/interdimensional-radio.git
