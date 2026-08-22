@@ -213,15 +213,21 @@ class SongGenerator:
         self._seed += 1
         self._started_at = time.time()
         title = song_title.random_title()
+        instrumental = song_title.roll_instrumental()
         self._title = title
-        log(f'generation started (seed {seed}, title "{title}")')
+        kind = "instrumental" if instrumental else "vocal"
+        log(f'generation started (seed {seed}, title "{title}", {kind})')
         prompt_dir = STAGING / "prompts"
         prompt_dir.mkdir(parents=True, exist_ok=True)
         stamp = int(time.time() * 1000)
         caption_path = prompt_dir / f"caption-{stamp}.txt"
         lyrics_path = prompt_dir / f"lyrics-{stamp}.txt"
-        caption_path.write_text(song_title.build_caption(title), encoding="utf-8")
-        lyrics_path.write_text(song_title.build_lyrics(title), encoding="utf-8")
+        caption_path.write_text(
+            song_title.build_caption(title, instrumental=instrumental), encoding="utf-8"
+        )
+        lyrics_path.write_text(
+            song_title.build_lyrics(title, instrumental=instrumental), encoding="utf-8"
+        )
         try:
             run(
                 [
