@@ -522,6 +522,9 @@ def run(
     from airadio import setup
 
     cfg = Config(home)
+    # ComfyUI + Music 3 must be reachable before setup or the radio loop.
+    if not music3.require_ready():
+        return 1
     if not skip_setup:
         if setup.is_ready(cfg.home):
             if verbose:
@@ -534,8 +537,6 @@ def run(
     stop_stray_radio_processes(cfg)
     acquire_radio_lock(cfg)
     stop_playback()
-    if not music3.require_ready():
-        return 1
     cfg.playback.mkdir(parents=True, exist_ok=True)
     ensure_catalog_hashes(cfg)
     imported = import_staging_songs(cfg)

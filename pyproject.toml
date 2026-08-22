@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "airadio"
-version = "0.3.0"
+version = "0.3.1"
 description = "Local AI radio loop with MiniMax Music 3 generation and interstitial fill"
 readme = "README.md"
 license = { text = "MIT" }

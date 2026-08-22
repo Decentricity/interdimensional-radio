@@ -263,6 +263,10 @@ def run_first_time_setup(
             print(f"Setup skipped — already ready ({readiness_summary(root)})", flush=True)
         return True
 
+    # Don't ask wizard questions if generation cannot run yet.
+    if not music3.require_ready():
+        return False
+
     if not quiet:
         print("\nWelcome to airadio!", flush=True)
         print(
