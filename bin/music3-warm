@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IDR_ROOT="${IDR_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+IDR_ROOT="${IDR_ROOT:-$REPO_ROOT}"
 ROOT="${MINIMAX_ROOT:-$HOME/.local/share/minimax-music3}"
 COMFY_ROOT="${COMFY_ROOT:-$HOME/.local/share/comfy-music3}"
 COMFY_BIN="${COMFY_BIN:-$ROOT/venv/bin/comfy}"

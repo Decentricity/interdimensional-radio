@@ -240,6 +240,29 @@ class SongGenerator:
                     "--no-play",
                 ]
             )
+        except subprocess.CalledProcessError as exc:
+            if out.is_file():
+                try:
+                    if duration(out) >= MIN_LIBRARY_S:
+                        log(
+                            f"gen exited {exc.returncode} but output exists — "
+                            f"using {out.name}"
+                        )
+                    else:
+                        raise
+                except (subprocess.CalledProcessError, ValueError, OSError):
+                    self._error = str(exc)
+                    log(f"generation failed (seed {seed}): {exc}")
+                    return
+            else:
+                self._error = str(exc)
+                log(f"generation failed (seed {seed}): {exc}")
+                return
+        except Exception as exc:  # noqa: BLE001
+            self._error = str(exc)
+            log(f"generation failed (seed {seed}): {exc}")
+            return
+        try:
             if not out.is_file():
                 raise RuntimeError("generation produced no file")
             self._path = out

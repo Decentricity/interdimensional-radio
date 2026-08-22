@@ -9,6 +9,7 @@
 # Generated audio (keep structure via .gitkeep)
 library/**/*.wav
 library/quarantine/
+library/catalog.json
 interstitials/audio/**/*.wav
 interstitials/generation*.log
 output/
