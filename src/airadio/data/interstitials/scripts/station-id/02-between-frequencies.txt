@@ -1,1 +1,1 @@
-This is Interdimensional Radio on your dial. All genres, no map, no curfew. IDR.
+This is {radio_name} on your dial. All genres, no map, no curfew. {call_letters}.

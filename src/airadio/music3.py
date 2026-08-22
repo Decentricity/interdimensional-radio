@@ -176,6 +176,7 @@ def generate(
     seed: int = 7,
     out: Path | None = None,
     play: bool = True,
+    verbose: bool = True,
 ) -> Path:
     if not lyrics.is_file():
         raise FileNotFoundError(f"lyrics file not found: {lyrics}")
@@ -195,28 +196,29 @@ def generate(
             f"audio/{slug}",
             workflow_path,
         )
-        print(f"Generating {duration}s on warm server (seed {seed})...")
+        if verbose:
+            print(f"Generating {duration}s on warm server (seed {seed})...")
         start = time.time()
-        subprocess.run(
-            [
-                str(COMFY_BIN),
-                "--workspace",
-                str(COMFY_ROOT),
-                "--skip-prompt",
-                "run",
-                "--workflow",
-                str(workflow_path),
-                "--wait",
-                "--host",
-                HOST,
-                "--port",
-                str(PORT),
-                "--timeout",
-                "7200",
-                "--no-notify",
-            ],
-            check=True,
-        )
+        cmd = [
+            str(COMFY_BIN),
+            "--workspace",
+            str(COMFY_ROOT),
+            "--skip-prompt",
+            "run",
+            "--workflow",
+            str(workflow_path),
+            "--wait",
+            "--host",
+            HOST,
+            "--port",
+            str(PORT),
+            "--timeout",
+            "7200",
+            "--no-notify",
+        ]
+        if verbose:
+            print("+ " + " ".join(cmd))
+        subprocess.run(cmd, check=True)
         wall = time.time() - start
 
     flac = _latest_flac(slug)
@@ -239,9 +241,10 @@ def generate(
         ],
         text=True,
     ).strip()
-    print(f"\nDone in {wall:.1f}s (warm)")
-    print(f"Duration: {dur}s")
-    print(f"Output:   {out}")
+    if verbose:
+        print(f"\nDone in {wall:.1f}s (warm)")
+        print(f"Duration: {dur}s")
+        print(f"Output:   {out}")
     if play:
         _play_wav(out)
     return out

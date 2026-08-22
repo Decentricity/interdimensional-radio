@@ -1,21 +1,21 @@
 [verse]
-{title}
+I keep on chasing what I cannot name
+{word1} thoughts and {word2} flame
 [pre-chorus]
-{word1}
-{word2}
+Something shifting in the air tonight
 [chorus]
-{title}
-{title}
+We keep on falling through the light
+The world keeps turning out of sight
 [verse]
-{word1}
-{word2}
+Every memory returns again
+Through the {word2} like gentle rain
 [chorus]
-{title}
-{title}
+We keep on falling through the light
+The world keeps turning out of sight
 [bridge]
-{title}
+If I could hold this moment still
 [chorus]
-{title}
-{title}
+We keep on falling through the light
+The world keeps turning out of sight
 [outro]
-{title}
+Fade away into the night

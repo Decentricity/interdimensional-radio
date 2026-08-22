@@ -1,1 +1,1 @@
-Interdimensional Radio: the station your ex's roommate said you'd hate. You didn't.
+{radio_name}: the station your ex's roommate said you'd hate. You didn't.

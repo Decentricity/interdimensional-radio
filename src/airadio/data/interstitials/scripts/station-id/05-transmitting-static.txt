@@ -1,1 +1,1 @@
-Interdimensional Radio, live from the booth at the end of the hall. Door locked, speakers on.
+{radio_name}, live from the booth at the end of the hall. Door locked, speakers on.

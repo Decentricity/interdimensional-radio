@@ -1,1 +1,1 @@
-Interdimensional Radio — for when the playlist knows something you don't. Keep listening.
+{radio_name} — for when the playlist knows something you don't. Keep listening.

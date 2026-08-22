@@ -512,8 +512,22 @@ def play_wait_session(gen: SongGenerator, cfg: Config, tmp: Path) -> tuple[Path 
     return last, gen.result()
 
 
-def run(home: Path | None = None) -> int:
+def run(
+    home: Path | None = None,
+    *,
+    verbose: bool = False,
+    quiet: bool = False,
+    skip_setup: bool = False,
+) -> int:
+    from airadio import setup
+
     cfg = Config(home)
+    if not skip_setup:
+        if setup.is_ready(cfg.home):
+            if verbose:
+                log(f"setup skipped — already ready ({setup.readiness_summary(cfg.home)})")
+        elif not setup.run_first_time_setup(cfg.home, verbose=verbose, quiet=quiet):
+            return 0
     if not cfg.caption.is_file() or not cfg.lyrics_template.is_file():
         log(f"missing prompts under {prompts_dir()}")
         return 1

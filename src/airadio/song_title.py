@@ -65,7 +65,10 @@ def build_caption(title: str, *, instrumental: bool = False, base_path: Path | N
     mood = (
         "Mood and arrangement should grow from this title."
         if instrumental
-        else "Mood, imagery, and lyrics should grow from this title."
+        else (
+            "Mood, imagery, and lyrics should grow from this title. "
+            "Do not simply repeat the song title or its two words as the main vocal hook."
+        )
     )
     return (
         f"{base}\n\n"
@@ -82,4 +85,8 @@ def build_lyrics(title: str, *, instrumental: bool = False, template_path: Path 
     template = (template_path or _prompt("normie-control.lyrics.template.txt")).read_text(
         encoding="utf-8"
     )
-    return template.format(title=title, word1=word1, word2=word2)
+    return template.format(
+        title=title,
+        word1=word1.lower(),
+        word2=word2.lower(),
+    )

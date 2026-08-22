@@ -21,9 +21,29 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="runtime data directory (default: AIRADIO_HOME or ~/.local/share/airadio)",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="verbose setup and generation output",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="quiet setup (progress bar only)",
+    )
+    parser.add_argument(
+        "--skip-setup",
+        action="store_true",
+        help="skip first-run setup even if interstitials are missing",
+    )
     sub = parser.add_subparsers(dest="command")
 
-    sub.add_parser("run", help="start the radio loop (default)")
+    run_p = sub.add_parser("run", help="start the radio loop (default)")
+    run_p.add_argument("-v", "--verbose", action="store_true", help=argparse.SUPPRESS)
+    run_p.add_argument("-q", "--quiet", action="store_true", help=argparse.SUPPRESS)
+    run_p.add_argument("--skip-setup", action="store_true", help=argparse.SUPPRESS)
 
     title_p = sub.add_parser("title", help="print random two-word song titles")
     title_p.add_argument("--count", type=int, default=1)
@@ -56,7 +76,12 @@ def main(argv: list[str] | None = None) -> int:
 
     command = args.command or "run"
     if command == "run":
-        return radio.run(user_home())
+        return radio.run(
+            user_home(),
+            verbose=args.verbose,
+            quiet=args.quiet,
+            skip_setup=args.skip_setup,
+        )
     if command == "title":
         import random
 

@@ -2,7 +2,14 @@
 
 A local AI radio loop: generate ~2-minute songs with [MiniMax Music 3](https://docs.comfy.org/tutorials/audio/minimax/minimax-music-3) in the background, play them with tail fades, and fill gaps with prerecorded interstitials or library tracks until the next song is ready.
 
-Install as **`airadio`** (PyPI-ready; not published yet):
+Install **`airadio`** from PyPI or from source:
+
+```bash
+pip install airadio
+airadio
+```
+
+Development install:
 
 ```bash
 git clone https://github.com/Decentricity/interdimensional-radio.git
@@ -186,7 +193,7 @@ Bundled in the package: prompts, title word lists, ComfyUI workflow builder, int
 ## Prompts and titles
 
 - **`prompts/normie-control.caption.txt`** — production metadata (genre-neutral pop).
-- **`prompts/normie-control.lyrics.template.txt`** — lyrics scaffold; `{title}`, `{word1}`, `{word2}` filled per song.
+- **`prompts/normie-control.lyrics.template.txt`** — lyrics scaffold; `{word1}` and `{word2}` from the title woven into verse lines (title stays in caption only).
 - **`prompts/song-title-words.json`** — 32×32 word lists for grammatical two-word titles.
 
 Edit the word lists or caption to steer the station sound. The radio writes per-generation caption/lyrics files under `.radio-staging/prompts/`.
