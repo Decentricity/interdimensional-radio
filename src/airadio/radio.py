@@ -32,6 +32,7 @@ TAIL_FADE_MAX = 2.0
 INTERSTITIAL_FADE_MAX = 2.0
 MIN_LIBRARY_S = 30.0
 INTERSTITIAL_FILL_MAX_S = 40.0
+CROSSFADE_S = 2.5
 
 _catalog_lock = threading.Lock()
 _play_lock = threading.Lock()
@@ -93,6 +94,27 @@ def tail_fade(path: Path, out: Path, fade_max: float = TAIL_FADE_MAX) -> Path:
             str(path),
             "-af",
             f"afade=t=out:st={start:.3f}:d={fade:.3f}",
+            str(out),
+        ]
+    )
+    return out
+
+
+def crossfade(a: Path, b: Path, out: Path, fade_s: float = CROSSFADE_S) -> Path:
+    """Overlap the end of *a* into the start of *b*."""
+    fade = min(fade_s, max(0.05, duration(a) - 0.05), max(0.05, duration(b) - 0.05))
+    run_cmd(
+        [
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            str(a),
+            "-i",
+            str(b),
+            "-filter_complex",
+            f"acrossfade=d={fade:.3f}:c1=tri:c2=tri",
             str(out),
         ]
     )
@@ -444,8 +466,18 @@ def bootstrap_first_song(gen: SongGenerator, cfg: Config, tmp: Path) -> tuple[Pa
     return nxt, False
 
 
-def play_filler_then_song(last: Path, song: Path, gen: SongGenerator, tmp: Path) -> None:
-    play_song_pipeline(song, gen, tmp)
+def play_bridge_into_song(cfg: Config, song: Path, gen: SongGenerator, tmp: Path) -> None:
+    """Play a fresh interstitial crossfaded into *song*, generating the next song meanwhile."""
+    gen.start()
+    log("generating next song while bridge + song play")
+    pick = random.choice(list_interstitials(cfg))
+    rel = pick.relative_to(cfg.interstitials)
+    log(f"bridge interstitial {rel} → song")
+    stamp = int(time.time() * 1000)
+    # Don't pre-fade the bridge clip — acrossfade handles the handoff into the song.
+    song_faded = tail_fade(song, tmp / f"song-bridged-{stamp}.wav")
+    bridged = crossfade(pick, song_faded, tmp / f"bridge-{stamp}.wav")
+    play(bridged)
 
 
 def play_library_song_fill(gen: SongGenerator, cfg: Config, tmp: Path) -> Path | None:
@@ -454,9 +486,8 @@ def play_library_song_fill(gen: SongGenerator, cfg: Config, tmp: Path) -> Path |
         return None
     log(f"library track: {pick.relative_to(cfg.home)}")
     faded = tail_fade(pick, tmp / f"library-fill-{int(time.time() * 1000)}.wav")
-    play(faded, stop_if=gen.ready)
-    if gen.ready():
-        log("song ready — cutting library track short")
+    # Always finish the library track; bridge interstitial comes after.
+    play(faded)
     return faded
 
 
@@ -465,9 +496,8 @@ def play_interstitial_clip(gen: SongGenerator, cfg: Config, tmp: Path) -> Path:
     rel = pick.relative_to(cfg.interstitials)
     log(f"interstitial {rel}")
     faded = tail_fade(pick, tmp / f"inter-{int(time.time() * 1000)}.wav", INTERSTITIAL_FADE_MAX)
-    play(faded, stop_if=gen.ready)
-    if gen.ready():
-        log("song ready — cutting interstitial short")
+    # Always finish the interstitial; bridge into the new song happens after.
+    play(faded)
     return faded
 
 
@@ -483,10 +513,9 @@ def play_interstitial_phase(gen: SongGenerator, cfg: Config, tmp: Path) -> Path 
 
 def transition_with_fill(gen: SongGenerator, cfg: Config, tmp: Path) -> tuple[Path, bool]:
     log(f"waiting for song ({gen.waiting_seconds():.0f}s elapsed)…")
-    last, nxt = play_wait_session(gen, cfg, tmp)
-    if last is None:
-        return nxt, False
-    play_filler_then_song(last, nxt, gen, tmp)
+    _last, nxt = play_wait_session(gen, cfg, tmp)
+    # Current interstitial/library clip has finished. Bridge with a *new* interstitial.
+    play_bridge_into_song(cfg, nxt, gen, tmp)
     if gen.ready():
         log("next song ready after fill")
         return gen.result(), True
