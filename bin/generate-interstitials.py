@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import json
 import random
 import shutil
 import subprocess
@@ -34,7 +33,15 @@ DJ_CAPTIONS = {
 }
 DJ_GENDERS_FILE = ROOT / "dj-genders.json"
 DJ_GENDER_CHOICES = ("male", "female", "alien")
-WARM = Path("/home/decentricity/music/bin/music3-warm")
+
+
+def warm_cmd(*parts: str) -> list[str]:
+    if shutil.which("airadio"):
+        return ["airadio", "music3", *parts]
+    script = Path(__file__).resolve().parent / "music3-warm"
+    return [str(script), *parts]
+
+
 PIPER_BIN = Path("/home/decentricity/companion-ai/.venv/bin/piper")
 PIPER_VOICE_DIR = Path.home() / ".local/share/companion-ai/piper-voices"
 PIPER_VOICE = PIPER_VOICE_DIR / "en_US-lessac-medium.onnx"
@@ -96,8 +103,7 @@ def music3_generate(
     lyrics = work / f"{kind}-{style}-{script.stem}.lyrics.txt"
     lyrics.write_text(f"[verse]\n{text}\n")
     run(
-        [
-            str(WARM),
+        warm_cmd(
             "gen",
             "--lyrics",
             str(lyrics),
@@ -110,7 +116,7 @@ def music3_generate(
             "--out",
             str(out_wav),
             "--no-play",
-        ]
+        )
     )
 
 
@@ -339,11 +345,11 @@ def main() -> int:
     manifest = rebuild_manifest_from_disk()
 
     if mode in ("piper",):
-        subprocess.run([str(WARM), "stop"], check=False)
+        subprocess.run(warm_cmd("stop"), check=False)
         batch_piper(manifest=manifest, skip_existing=skip_existing)
 
     if mode in ("dj-music3",):
-        run([str(WARM), "start"])
+        run(warm_cmd("start"))
         batch_dj_music3(
             manifest=manifest,
             skip_existing=skip_existing,
@@ -379,7 +385,7 @@ def main() -> int:
     }
 
     if mode in music3_batches:
-        run([str(WARM), "start"])
+        run(warm_cmd("start"))
         for kind, style in music3_batches[mode]:
             batch_music3(
                 kind,

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "airadio"
+version = "0.1.0"
+description = "Local AI radio loop with MiniMax Music 3 generation and interstitial fill"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Decentricity" }]
+keywords = ["music", "radio", "comfyui", "minimax", "ai"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = []
+
+[project.scripts]
+airadio = "airadio.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Decentricity/interdimensional-radio"
+Repository = "https://github.com/Decentricity/interdimensional-radio"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+airadio = ["data/**/*"]

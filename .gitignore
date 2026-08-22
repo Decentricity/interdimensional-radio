@@ -1,3 +1,9 @@
+# Python packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
 # Runtime / local state
 .radio-staging/
 .comfy-warm.pid

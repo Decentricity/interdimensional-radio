@@ -1,6 +1,15 @@
-# Interdimensional Radio
+# airadio — local AI radio with MiniMax Music 3
 
 A local AI radio loop: generate ~2-minute songs with [MiniMax Music 3](https://docs.comfy.org/tutorials/audio/minimax/minimax-music-3) in the background, play them with tail fades, and fill gaps with prerecorded interstitials or library tracks until the next song is ready.
+
+Install as **`airadio`** (PyPI-ready; not published yet):
+
+```bash
+git clone https://github.com/Decentricity/interdimensional-radio.git
+cd interdimensional-radio
+pip install -e .
+airadio
+```
 
 Each new song gets a random two-word title that primes generation and becomes the filename (`velvet-garden4289.wav`).
 
@@ -27,22 +36,37 @@ You also need:
 ```bash
 git clone https://github.com/Decentricity/interdimensional-radio.git
 cd interdimensional-radio
-export IDR_ROOT="$PWD"   # optional; auto-detected from script location
 
-# 1. Install MiniMax Music 3 + ComfyUI (see below)
-# 2. Add scripts to PATH (or symlink)
-mkdir -p ~/.local/bin
-ln -sf "$PWD/bin/music3-warm" ~/.local/bin/
-ln -sf "$PWD/bin/interdimensional-radio" ~/.local/bin/
+# 1. Install the package (editable dev install)
+pip install -e .
 
-# 3. Generate interstitial clips (optional but recommended)
+# 2. Install MiniMax Music 3 + ComfyUI (see below)
+
+# 3. Optional: point runtime data at this checkout (auto-detected if library/ exists here)
+export AIRADIO_HOME="$PWD"
+
+# 4. Generate interstitial clips (optional but recommended)
 python3 bin/generate-interstitials.py music3-both
 
-# 4. Run the radio
-interdimensional-radio
+# 5. Run the radio
+airadio
 ```
 
-Set `IDR_ROOT` if you keep the repo outside the default layout. Runtime state (staging, logs, pid files) lives under `$IDR_ROOT/.radio-staging/`.
+Legacy wrappers `bin/interdimensional-radio` and `bin/music3-warm` forward to `airadio`.
+
+Set `AIRADIO_HOME` if you keep runtime data (library, interstitials audio, staging) outside the install directory. Runtime state lives under `$AIRADIO_HOME/.radio-staging/`.
+
+## CLI
+
+| Command | Purpose |
+|---------|---------|
+| `airadio` | Start the radio loop |
+| `airadio run` | Same as above |
+| `airadio title` | Print random two-word song titles |
+| `airadio music3 start` | Start warm ComfyUI server |
+| `airadio music3 stop` | Stop warm server |
+| `airadio music3 status` | Server + GPU status |
+| `airadio music3 gen …` | One-off generation |
 
 ## Install MiniMax Music 3
 
@@ -106,24 +130,28 @@ python3 -m venv "$MINIMAX_ROOT/venv"
 ### 4. Smoke test
 
 ```bash
-export IDR_ROOT=/path/to/interdimensional-radio
-music3-warm start
-music3-warm gen \
-  --lyrics prompts/normie-control.lyrics.template.txt \
-  --prompt prompts/normie-control.caption.txt \
-  --duration 30 --seed 1 --out /tmp/test.wav --no-play
-music3-warm stop
+export AIRADIO_HOME=/path/to/interdimensional-radio   # or any data directory
+airadio music3 start
+airadio music3 gen \
+  --lyrics "$(python3 -c 'from airadio import song_title; print(song_title.build_lyrics("Test Song"))')" \
+  ...
 ```
 
-For a real generation, build lyrics from a title first (`python3 prompts/song_title.py`); the radio does this automatically.
+For a real smoke test, use bundled prompt files under the installed package or write temp caption/lyrics files.
+
+```bash
+airadio music3 start
+# use paths from your AIRADIO_HOME or package data
+airadio music3 stop
+```
 
 ## How it works
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
-│ interdimensional│────▶│ music3-warm      │────▶│ ComfyUI     │
-│ -radio          │     │ (warm server)    │     │ MiniMax M3  │
-└────────┬────────┘     └──────────────────┘     └─────────────┘
+┌─────────┐     ┌──────────────────┐     ┌─────────────┐
+│ airadio │────▶│ airadio.music3   │────▶│ ComfyUI     │
+│ run     │     │ (warm server)    │     │ MiniMax M3  │
+└────┬────┘     └──────────────────┘     └─────────────┘
          │
          ├── library/          saved songs (title+seed.wav)
          ├── interstitials/    gap-fill clips
@@ -137,23 +165,23 @@ For a real generation, build lyrics from a title first (`python3 prompts/song_ti
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `bin/interdimensional-radio` | Main radio loop |
-| `bin/music3-warm` | Keep ComfyUI warm; `start` / `stop` / `status` / `gen` |
+| Entry point | Purpose |
+|-------------|---------|
+| `airadio` | Main radio loop + subcommands |
 | `bin/generate-interstitials.py` | Batch-generate station IDs, ads, DJ chatter |
-| `workflows/build_api_workflow.py` | Build ComfyUI API workflow JSON for a gen job |
-| `prompts/song_title.py` | Random two-word title generator |
+
+Bundled in the package: prompts, title word lists, ComfyUI workflow builder, interstitial scripts/prompts.
 
 ## Environment variables
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `IDR_ROOT` | repo root | Project root (prompts, library, staging) |
+| `AIRADIO_HOME` | `~/.local/share/airadio` (or cwd if `library/` exists) | Runtime data root |
+| `IDR_ROOT` | *(alias for `AIRADIO_HOME`)* | Legacy name |
 | `COMFY_ROOT` | `~/.local/share/comfy-music3` | ComfyUI install |
 | `MINIMAX_ROOT` | `~/.local/share/minimax-music3` | comfy-cli venv |
-| `IDR_WORKFLOWS` | `$IDR_ROOT/workflows` | Workflow builder scripts |
 | `COMFY_BIN` | `$MINIMAX_ROOT/venv/bin/comfy` | comfy-cli binary |
+| `AIRADIO_PROMPTS` | bundled package prompts | Override prompt directory |
 
 ## Prompts and titles
 
