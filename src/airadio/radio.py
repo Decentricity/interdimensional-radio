@@ -534,7 +534,8 @@ def run(
     stop_stray_radio_processes(cfg)
     acquire_radio_lock(cfg)
     stop_playback()
-    music3.start_server()
+    if not music3.require_ready():
+        return 1
     cfg.playback.mkdir(parents=True, exist_ok=True)
     ensure_catalog_hashes(cfg)
     imported = import_staging_songs(cfg)

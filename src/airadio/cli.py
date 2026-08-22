@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from airadio import __version__, music3, radio, song_title
+from airadio import __version__, radio, song_title
 from airadio.paths import user_home
 
 
@@ -49,20 +49,6 @@ def _build_parser() -> argparse.ArgumentParser:
     title_p.add_argument("--count", type=int, default=1)
     title_p.add_argument("--seed", type=int)
 
-    m3 = sub.add_parser("music3", help="MiniMax Music 3 warm ComfyUI server")
-    m3_sub = m3.add_subparsers(dest="music3_cmd", required=True)
-    m3_sub.add_parser("start", help="start ComfyUI and hold GPU lock")
-    m3_sub.add_parser("stop", help="stop warm server")
-    m3_sub.add_parser("status", help="show server status")
-
-    gen_p = m3_sub.add_parser("gen", help="generate one song")
-    gen_p.add_argument("--lyrics", type=Path, required=True)
-    gen_p.add_argument("--prompt", type=Path, required=True)
-    gen_p.add_argument("--duration", type=int, default=120)
-    gen_p.add_argument("--seed", type=int, default=7)
-    gen_p.add_argument("--out", type=Path)
-    gen_p.add_argument("--no-play", action="store_true")
-
     return parser
 
 
@@ -89,26 +75,6 @@ def main(argv: list[str] | None = None) -> int:
         for _ in range(args.count):
             print(song_title.random_title(rng))
         return 0
-    if command == "music3":
-        if args.music3_cmd == "start":
-            music3.start_server()
-            return 0
-        if args.music3_cmd == "stop":
-            music3.stop_server()
-            return 0
-        if args.music3_cmd == "status":
-            music3.status()
-            return 0
-        if args.music3_cmd == "gen":
-            music3.generate(
-                lyrics=args.lyrics,
-                caption=args.prompt,
-                duration=args.duration,
-                seed=args.seed,
-                out=args.out,
-                play=not args.no_play,
-            )
-            return 0
     parser.print_help()
     return 1
 

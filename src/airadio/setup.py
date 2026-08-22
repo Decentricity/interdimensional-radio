@@ -225,7 +225,8 @@ def generate_interstitials(
     total = len(jobs)
     if not quiet:
         print(f"\nGenerating {total} interstitial clip(s)…", flush=True)
-    music3.start_server()
+    if not music3.require_ready():
+        raise RuntimeError("ComfyUI + MiniMax Music 3 is not reachable")
     for i, (kind, script, out_wav) in enumerate(jobs, start=1):
         label = f"{kind}/{out_wav.name}"
         render_progress(i - 1, total, label, quiet=quiet)

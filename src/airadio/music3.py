@@ -1,171 +1,102 @@
-"""Warm ComfyUI server and MiniMax Music 3 generation."""
+"""Talk to a running ComfyUI + MiniMax Music 3 install over HTTP."""
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
-import tempfile
 import time
-from datetime import datetime
+import urllib.error
+import urllib.parse
+import urllib.request
+import uuid
 from pathlib import Path
 
 from airadio import workflow
 from airadio.paths import user_home
+from airadio.workflow import EMPTY_LATENT_NODE, TEXT_ENCODE_NODE
 
-MINIMAX_ROOT = Path(
-    os.environ.get("MINIMAX_ROOT", Path.home() / ".local/share/minimax-music3")
-).expanduser()
-COMFY_ROOT = Path(
-    os.environ.get("COMFY_ROOT", Path.home() / ".local/share/comfy-music3")
-).expanduser()
-COMFY_BIN = Path(
-    os.environ.get("COMFY_BIN", MINIMAX_ROOT / "venv/bin/comfy")
-).expanduser()
-PORT = int(os.environ.get("AIRADIO_COMFY_PORT", "8188"))
 HOST = os.environ.get("AIRADIO_COMFY_HOST", "127.0.0.1")
-LOCK = MINIMAX_ROOT / "gpu.lock"
+PORT = int(os.environ.get("AIRADIO_COMFY_PORT", "8188"))
+
+COMFYUI_REPO = "https://github.com/comfyanonymous/ComfyUI"
+MUSIC3_GUIDE = "https://docs.comfy.org/tutorials/audio/minimax/minimax-music-3"
 
 
-def _home() -> Path:
-    return user_home()
+def base_url() -> str:
+    return f"http://{HOST}:{PORT}"
 
 
-def _pid_file() -> Path:
-    return _home() / ".comfy-warm.pid"
+def _get_json(path: str, *, timeout: float = 5.0) -> dict | list:
+    url = f"{base_url()}{path}"
+    with urllib.request.urlopen(url, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
 
 
-def _lock_pid_file() -> Path:
-    return _home() / ".comfy-warm-lock.pid"
-
-
-def _log_file() -> Path:
-    return _home() / ".comfy-warm.log"
+def _post_json(path: str, payload: dict, *, timeout: float = 30.0) -> dict:
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        f"{base_url()}{path}",
+        data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))
 
 
 def server_up() -> bool:
     try:
-        subprocess.run(
-            ["curl", "-sf", f"http://{HOST}:{PORT}/system_stats"],
-            check=True,
-            capture_output=True,
-        )
+        _get_json("/system_stats", timeout=3.0)
         return True
-    except subprocess.CalledProcessError:
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError):
         return False
 
 
-def start_server() -> None:
-    home = _home()
-    home.mkdir(parents=True, exist_ok=True)
-    pid_file = _pid_file()
-    if server_up():
-        print(f"ComfyUI already up on {HOST}:{PORT}")
-    else:
-        if pid_file.is_file():
-            pid = int(pid_file.read_text().strip())
-            if pid and _process_alive(pid):
-                print("Waiting for existing warm PID...")
-            else:
-                pid = _launch_comfy(pid_file)
-        else:
-            pid = _launch_comfy(pid_file)
-        for attempt in range(1, 121):
-            if server_up():
-                break
-            time.sleep(2)
-            if attempt == 120:
-                log_tail = _log_file().read_text(encoding="utf-8") if _log_file().is_file() else ""
-                raise RuntimeError(
-                    f"ComfyUI did not start within 240s\n{log_tail[-4000:]}"
-                )
-        print(f"ComfyUI ready (pid {pid_file.read_text().strip()})")
-
-    lock_pid_file = _lock_pid_file()
-    if lock_pid_file.is_file():
-        try:
-            lpid = int(lock_pid_file.read_text().strip())
-        except ValueError:
-            lpid = 0
-        if lpid and _process_alive(lpid):
-            print("GPU lock already held")
-            return
-    LOCK.parent.mkdir(parents=True, exist_ok=True)
-    proc = subprocess.Popen(
-        [
-            "bash",
-            "-c",
-            f'exec 9>>"{LOCK}"; flock 9; while kill -0 $$ 2>/dev/null; do sleep 3600; done',
-        ],
-        start_new_session=True,
-    )
-    lock_pid_file.write_text(str(proc.pid), encoding="utf-8")
-    print(f"Holding {LOCK} (pid {proc.pid})")
-
-
-def _launch_comfy(pid_file: Path) -> int:
-    print(f"Starting warm ComfyUI on {HOST}:{PORT}...")
-    log_path = _log_file()
-    with log_path.open("ab") as log_handle:
-        proc = subprocess.Popen(
-            [
-                str(COMFY_ROOT / ".venv/bin/python"),
-                "main.py",
-                "--listen",
-                HOST,
-                "--port",
-                str(PORT),
-                "--disable-auto-launch",
-            ],
-            cwd=COMFY_ROOT,
-            stdout=log_handle,
-            stderr=subprocess.STDOUT,
-        )
-    pid_file.write_text(str(proc.pid), encoding="utf-8")
-    return proc.pid
-
-
-def _process_alive(pid: int) -> bool:
+def music3_nodes_present() -> bool:
     try:
-        os.kill(pid, 0)
-    except OSError:
+        info = _get_json("/object_info", timeout=10.0)
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError):
         return False
-    return True
+    if not isinstance(info, dict):
+        return False
+    return TEXT_ENCODE_NODE in info and EMPTY_LATENT_NODE in info
 
 
-def stop_server() -> None:
-    pid_file = _pid_file()
-    if pid_file.is_file():
-        pid = int(pid_file.read_text().strip())
-        if _process_alive(pid):
-            os.kill(pid, 15)
-            try:
-                os.waitpid(pid, 0)
-            except ChildProcessError:
-                pass
-            print(f"Stopped ComfyUI pid {pid}")
-        pid_file.unlink(missing_ok=True)
-    _lock_pid_file().unlink(missing_ok=True)
-    print("Released GPU lock")
-    if server_up():
-        print(f"Warning: something still responds on :{PORT}", flush=True)
+def ready() -> bool:
+    """True when ComfyUI is reachable and exposes MiniMax Music 3 nodes."""
+    return server_up() and music3_nodes_present()
 
 
-def status() -> None:
-    print(f"server: {'up' if server_up() else 'down'} ({HOST}:{PORT})")
-    pid_file = _pid_file()
-    print(f"pid_file: {pid_file.read_text().strip() if pid_file.is_file() else 'none'}")
-    lock_file = _lock_pid_file()
-    print(f"lock_pid: {lock_file.read_text().strip() if lock_file.is_file() else 'none'}")
-    if shutil.which("nvidia-smi"):
-        subprocess.run(
-            [
-                "nvidia-smi",
-                "--query-compute-apps=pid,process_name,used_gpu_memory",
-                "--format=csv",
-            ],
-            check=False,
-        )
+def unreachable_message() -> str:
+    endpoint = base_url()
+    return (
+        "airadio is your personal radio station using your local install of ComfyUI\n"
+        "and MiniMax Music 3!\n"
+        "\n"
+        f"I can't talk to ComfyUI at {endpoint} yet.\n"
+        "\n"
+        "Please either:\n"
+        "  • Start ComfyUI (with MiniMax Music 3) so it's listening there, or\n"
+        "  • Install them if you haven't:\n"
+        "\n"
+        "      1. ComfyUI\n"
+        f"         {COMFYUI_REPO}\n"
+        "\n"
+        "      2. MiniMax Music 3 (follow this guide — it covers the model files too)\n"
+        f"         {MUSIC3_GUIDE}\n"
+        "\n"
+        "Then rerun: airadio\n"
+    )
+
+
+def require_ready() -> bool:
+    """Print guidance and return False if ComfyUI + Music 3 is unreachable."""
+    if ready():
+        return True
+    print(unreachable_message(), end="", flush=True)
+    return False
 
 
 def generate(
@@ -182,53 +113,111 @@ def generate(
         raise FileNotFoundError(f"lyrics file not found: {lyrics}")
     if not caption.is_file():
         raise FileNotFoundError(f"caption file not found: {caption}")
-    if not server_up():
-        start_server()
+    if not require_ready():
+        raise RuntimeError("ComfyUI + MiniMax Music 3 is not reachable")
 
-    slug = f"music3-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    with tempfile.TemporaryDirectory() as tmp:
-        workflow_path = Path(tmp) / "workflow.json"
-        workflow.build_workflow(
-            float(duration),
-            seed,
-            caption,
-            lyrics,
-            f"audio/{slug}",
-            workflow_path,
-        )
-        if verbose:
-            print(f"Generating {duration}s on warm server (seed {seed})...")
-        start = time.time()
-        cmd = [
-            str(COMFY_BIN),
-            "--workspace",
-            str(COMFY_ROOT),
-            "--skip-prompt",
-            "run",
-            "--workflow",
-            str(workflow_path),
-            "--wait",
-            "--host",
-            HOST,
-            "--port",
-            str(PORT),
-            "--timeout",
-            "7200",
-            "--no-notify",
-        ]
-        if verbose:
-            print("+ " + " ".join(cmd))
-        subprocess.run(cmd, check=True)
-        wall = time.time() - start
+    slug = f"airadio-{time.strftime('%Y%m%d-%H%M%S')}-{seed}"
+    prompt = workflow.build_prompt(
+        float(duration),
+        seed,
+        caption.read_text(encoding="utf-8"),
+        lyrics.read_text(encoding="utf-8"),
+        f"audio/{slug}",
+    )
+    if verbose:
+        print(f"Generating {duration}s via {base_url()} (seed {seed})...", flush=True)
 
-    flac = _latest_flac(slug)
-    if flac is None:
-        raise RuntimeError("Generation failed — no output file found")
+    started = time.time()
+    prompt_id = _queue_prompt(prompt)
+    if verbose:
+        print(f"Queued prompt {prompt_id}", flush=True)
+    outputs = _wait_for_prompt(prompt_id, timeout_s=max(600.0, duration * 60.0))
+    audio_meta = _first_audio_output(outputs)
+    if audio_meta is None:
+        raise RuntimeError("Generation finished but no audio output was returned")
+
     if out is None:
-        out = _home() / "output" / f"{slug}.wav"
+        out = user_home() / "output" / f"{slug}.wav"
     out.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["ffmpeg", "-y", "-i", str(flac), str(out)], check=True, capture_output=True)
-    dur = subprocess.check_output(
+
+    raw = out.with_suffix(Path(audio_meta["filename"]).suffix or ".flac")
+    _download_view(audio_meta, raw)
+    if raw.suffix.lower() == ".wav":
+        if raw.resolve() != out.resolve():
+            shutil.move(str(raw), str(out))
+    else:
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", str(raw), str(out)],
+            check=True,
+            capture_output=True,
+        )
+        raw.unlink(missing_ok=True)
+
+    wall = time.time() - started
+    if verbose:
+        dur = _probe_duration(out)
+        print(f"\nDone in {wall:.1f}s", flush=True)
+        print(f"Duration: {dur}s", flush=True)
+        print(f"Output:   {out}", flush=True)
+    if play:
+        _play_wav(out)
+    return out
+
+
+def _queue_prompt(prompt: dict) -> str:
+    client_id = str(uuid.uuid4())
+    result = _post_json("/prompt", {"prompt": prompt, "client_id": client_id})
+    prompt_id = result.get("prompt_id")
+    if not prompt_id:
+        raise RuntimeError(f"ComfyUI did not accept prompt: {result}")
+    return str(prompt_id)
+
+
+def _wait_for_prompt(prompt_id: str, *, timeout_s: float) -> dict:
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        try:
+            history = _get_json(f"/history/{prompt_id}", timeout=10.0)
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError):
+            time.sleep(2)
+            continue
+        if isinstance(history, dict) and prompt_id in history:
+            entry = history[prompt_id]
+            status = entry.get("status") or {}
+            if status.get("completed") or entry.get("outputs"):
+                status_str = status.get("status_str", "success")
+                if status_str == "error":
+                    raise RuntimeError(f"ComfyUI prompt failed: {status}")
+                return entry.get("outputs") or {}
+        time.sleep(2)
+    raise TimeoutError(f"Timed out waiting for ComfyUI prompt {prompt_id}")
+
+
+def _first_audio_output(outputs: dict) -> dict | None:
+    for node_out in outputs.values():
+        if not isinstance(node_out, dict):
+            continue
+        for item in node_out.get("audio") or []:
+            if isinstance(item, dict) and item.get("filename"):
+                return item
+    return None
+
+
+def _download_view(meta: dict, dest: Path) -> None:
+    query = urllib.parse.urlencode(
+        {
+            "filename": meta["filename"],
+            "subfolder": meta.get("subfolder") or "",
+            "type": meta.get("type") or "output",
+        }
+    )
+    url = f"{base_url()}/view?{query}"
+    with urllib.request.urlopen(url, timeout=120) as resp:
+        dest.write_bytes(resp.read())
+
+
+def _probe_duration(path: Path) -> str:
+    return subprocess.check_output(
         [
             "ffprobe",
             "-v",
@@ -237,23 +226,10 @@ def generate(
             "format=duration",
             "-of",
             "csv=p=0",
-            str(out),
+            str(path),
         ],
         text=True,
     ).strip()
-    if verbose:
-        print(f"\nDone in {wall:.1f}s (warm)")
-        print(f"Duration: {dur}s")
-        print(f"Output:   {out}")
-    if play:
-        _play_wav(out)
-    return out
-
-
-def _latest_flac(slug: str) -> Path | None:
-    audio_dir = COMFY_ROOT / "output" / "audio"
-    matches = sorted(audio_dir.glob(f"{slug}*.flac"), key=lambda p: p.stat().st_mtime, reverse=True)
-    return matches[0] if matches else None
 
 
 def _play_wav(path: Path) -> None:
