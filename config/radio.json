@@ -1,0 +1,13 @@
+{
+  "song_duration_sec": 120,
+  "interstitial_fade_sec": 1.8,
+  "song_tail_fade_sec": 2.0,
+  "crossfade_sec": 2.5,
+  "poll_interval_sec": 0.5,
+  "default_category": "synthwave/cyberpunk-pop",
+  "categories": [
+    "synthwave/cyberpunk-pop",
+    "synthwave/noir-ballad",
+    "electronic/driving-pop"
+  ]
+}

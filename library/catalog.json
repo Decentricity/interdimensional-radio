@@ -1,0 +1,83 @@
+{
+  "songs": [
+    {
+      "path": "library/song-20260822-130844.wav",
+      "saved_at": "2026-08-22T06:11:00.616899+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "source": "song-20260822-130844",
+      "md5": "5face0c82d192fda9af1830c9e75a61d"
+    },
+    {
+      "path": "library/song-20260822-131044.wav",
+      "saved_at": "2026-08-22T06:08:44.351681+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "source": "song-20260822-131044",
+      "md5": "e23acb34f7ba38b01e726d79c867ad51"
+    },
+    {
+      "path": "library/song-normie-control-120s.wav",
+      "saved_at": "2026-08-22T05:12:08.481031+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "source": "song-normie-control-120s",
+      "md5": "9fd871012359e2e9abd493c3a60f4e40"
+    },
+    {
+      "path": "library/song-20260822-131429.wav",
+      "saved_at": "2026-08-22T06:14:29.388872+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "6900f53656aca3b4e206430c8a1ed0c6"
+    },
+    {
+      "path": "library/song-20260822-132919.wav",
+      "saved_at": "2026-08-22T06:29:19.820401+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "8871a8c24acce53c03c512d3d4e793e3",
+      "seed": 6199
+    },
+    {
+      "path": "library/song-20260822-133251.wav",
+      "saved_at": "2026-08-22T06:32:51.535030+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "6f17ccecefca7fb6a0e2fec3e682ae79",
+      "seed": 7322
+    },
+    {
+      "path": "library/song-20260822-134030.wav",
+      "saved_at": "2026-08-22T06:40:30.225339+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "44aefc75be3d95ba9002eafcee946f1d",
+      "seed": 7109
+    },
+    {
+      "path": "library/song-20260822-134312.wav",
+      "saved_at": "2026-08-22T06:43:12.562298+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "e42955280662081d38812f110ec115aa",
+      "seed": 7110
+    },
+    {
+      "path": "library/song-20260822-134545.wav",
+      "saved_at": "2026-08-22T06:45:45.865422+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "be9c805f7e8fd76a4e2ab84963801a0b",
+      "seed": 7111
+    },
+    {
+      "path": "library/song-20260822-135040.wav",
+      "saved_at": "2026-08-22T06:50:40.568128+00:00",
+      "duration_s": 119.989,
+      "bytes": 21166158,
+      "md5": "d24e1db5f5029b549933f10317225415",
+      "seed": 3404
+    }
+  ]
+}

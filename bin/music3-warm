@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# Warm MiniMax Music 3 path: keep ComfyUI alive on :8188 for sequential radio gens.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+IDR_ROOT="${IDR_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+ROOT="${MINIMAX_ROOT:-$HOME/.local/share/minimax-music3}"
+COMFY_ROOT="${COMFY_ROOT:-$HOME/.local/share/comfy-music3}"
+COMFY_BIN="${COMFY_BIN:-$ROOT/venv/bin/comfy}"
+WORKFLOWS="${IDR_WORKFLOWS:-$IDR_ROOT/workflows}"
+CHAT_DIR="${IDR_ROOT}"
+PID_FILE="$CHAT_DIR/.comfy-warm.pid"
+LOG_FILE="$CHAT_DIR/.comfy-warm.log"
+LOCK_PID_FILE="$CHAT_DIR/.comfy-warm-lock.pid"
+LOCK="$ROOT/gpu.lock"
+PORT=8188
+HOST=127.0.0.1
+
+usage() {
+  cat <<'EOF'
+Usage:
+  music3-warm start              Start ComfyUI and hold GPU lock
+  music3-warm stop               Stop warm server / release lock
+  music3-warm status             Show server + VRAM status
+  music3-warm gen [music3 opts]  Generate against warm server
+EOF
+  exit 0
+}
+
+server_up() {
+  curl -sf "http://$HOST:$PORT/system_stats" >/dev/null 2>&1
+}
+
+start_server() {
+  mkdir -p "$CHAT_DIR"
+  if server_up; then
+    echo "ComfyUI already up on $HOST:$PORT"
+  else
+    if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+      echo "Waiting for existing warm PID..."
+    else
+      echo "Starting warm ComfyUI on $HOST:$PORT..."
+      cd "$COMFY_ROOT"
+      nohup "$COMFY_ROOT/.venv/bin/python" main.py \
+        --listen "$HOST" --port "$PORT" --disable-auto-launch \
+        >"$LOG_FILE" 2>&1 &
+      echo $! >"$PID_FILE"
+    fi
+    for i in $(seq 1 120); do
+      server_up && break
+      sleep 2
+      if [[ "$i" -eq 120 ]]; then
+        echo "ComfyUI did not start within 240s" >&2
+        tail -n 80 "$LOG_FILE" >&2 || true
+        exit 1
+      fi
+    done
+    echo "ComfyUI ready (pid $(cat "$PID_FILE"))"
+  fi
+
+  # Hold music3 gpu.lock so stock music3 won't clash with the warm server.
+  if [[ -f "$LOCK_PID_FILE" ]] && kill -0 "$(cat "$LOCK_PID_FILE")" 2>/dev/null; then
+    echo "GPU lock already held"
+  else
+    (
+      flock 9
+      # Keep lock until killed
+      while kill -0 "$$" 2>/dev/null; do sleep 3600; done
+    ) 9>"$LOCK" &
+    echo $! >"$LOCK_PID_FILE"
+    echo "Holding $LOCK (pid $(cat "$LOCK_PID_FILE"))"
+  fi
+}
+
+stop_server() {
+  if [[ -f "$PID_FILE" ]]; then
+    pid="$(cat "$PID_FILE")"
+    if kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      echo "Stopped ComfyUI pid $pid"
+    fi
+    rm -f "$PID_FILE"
+  fi
+  if [[ -f "$LOCK_PID_FILE" ]]; then
+    lpid="$(cat "$LOCK_PID_FILE")"
+    kill "$lpid" 2>/dev/null || true
+    rm -f "$LOCK_PID_FILE"
+    echo "Released GPU lock"
+  fi
+  # If something else still answers, leave a note
+  if server_up; then
+    echo "Warning: something still responds on :$PORT" >&2
+  fi
+}
+
+status() {
+  if server_up; then
+    echo "server: up ($HOST:$PORT)"
+  else
+    echo "server: down"
+  fi
+  [[ -f "$PID_FILE" ]] && echo "pid_file: $(cat "$PID_FILE")" || echo "pid_file: none"
+  [[ -f "$LOCK_PID_FILE" ]] && echo "lock_pid: $(cat "$LOCK_PID_FILE")" || echo "lock_pid: none"
+  nvidia-smi --query-compute-apps=pid,process_name,used_gpu_memory --format=csv 2>/dev/null || true
+}
+
+gen() {
+  local LYRICS="" CAPTION="" DURATION=60 SEED=7 OUT="" NO_PLAY=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) usage ;;
+      --lyrics)  LYRICS="$2"; shift 2 ;;
+      --prompt)  CAPTION="$2"; shift 2 ;;
+      --duration) DURATION="$2"; shift 2 ;;
+      --seed)    SEED="$2"; shift 2 ;;
+      --out)     OUT="$2"; shift 2 ;;
+      --no-play) NO_PLAY=1; shift ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  if [[ -z "$LYRICS" || -z "$CAPTION" ]]; then
+    echo "Error: --lyrics and --prompt are required" >&2
+    exit 1
+  fi
+  if ! server_up; then
+    start_server
+  fi
+
+  local workdir slug start end wall flac dur
+  workdir="$(mktemp -d)"
+  cleanup_workdir() { rm -rf "$workdir"; }
+  trap cleanup_workdir EXIT
+  slug="music3-$(date +%Y%m%d-%H%M%S)"
+
+  python3 "$WORKFLOWS/build_api_workflow.py" \
+    "$DURATION" "$SEED" "$CAPTION" "$LYRICS" "audio/$slug" "$workdir/workflow.json"
+
+  echo "Generating ${DURATION}s on warm server (seed $SEED)..."
+  start=$(date +%s.%N)
+  "$COMFY_BIN" --workspace "$COMFY_ROOT" --skip-prompt \
+    run --workflow "$workdir/workflow.json" \
+    --wait --host "$HOST" --port "$PORT" --timeout 7200 --no-notify 2>&1
+  end=$(date +%s.%N)
+  wall=$(python3 -c "print(f'{float($end)-float($start):.1f}')")
+
+  flac=$(find "$COMFY_ROOT/output/audio" -name "${slug}*" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
+  if [[ -z "$flac" || ! -f "$flac" ]]; then
+    echo "Generation failed — no output file found" >&2
+    exit 1
+  fi
+  if [[ -z "$OUT" ]]; then
+    OUT="$CHAT_DIR/output/${slug}.wav"
+  fi
+  mkdir -p "$(dirname "$OUT")"
+  ffmpeg -y -i "$flac" "$OUT" 2>/dev/null
+  dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT" 2>/dev/null)
+  echo ""
+  echo "Done in ${wall}s (warm)"
+  echo "Duration: ${dur}s"
+  echo "Output:   $OUT"
+
+  if [[ "$NO_PLAY" -eq 0 ]]; then
+    if command -v pw-play >/dev/null 2>&1; then
+      pw-play "$OUT"
+    elif command -v aplay >/dev/null 2>&1; then
+      aplay -q "$OUT"
+    fi
+  fi
+  trap - EXIT
+  cleanup_workdir
+}
+
+cmd="${1:-}"
+case "$cmd" in
+  ""|-h|--help) usage ;;
+  start) start_server ;;
+  stop) stop_server ;;
+  status) status ;;
+  gen) shift; gen "$@" ;;
+  *) echo "Unknown command: $cmd" >&2; usage ;;
+esac

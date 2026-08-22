@@ -1,0 +1,27 @@
+{
+  "note": "Random DJ gender per script for Music3 voice-only generation. Regenerate with: python3 generate-interstitials.py dj-music3 --force",
+  "assigned_at": "2026-08-22",
+  "genders": {
+    "01-three-chords-prophecy": "female",
+    "02-timeline-shift": "alien",
+    "03-bass-drop-weather": "male",
+    "04-reflection-harmonizing": "female",
+    "05-vibes-in-mail": "alien",
+    "06-no-requests-warnings": "male",
+    "07-mistakes-remix": "female",
+    "08-signal-check": "male",
+    "09-portal-normal": "alien",
+    "10-synchronized": "female",
+    "11-future-setlist": "male",
+    "12-weather-report": "alien",
+    "13-algorithm-violence": "female",
+    "14-legal-listening": "male",
+    "15-gap-not-silence": "alien",
+    "16-void-sponsorship": "female",
+    "17-cold-coffee": "male",
+    "18-between-verses": "alien",
+    "19-universe-throat": "female",
+    "20-escaped-preproduction": "male",
+    "21-mascot-cart": "female"
+  }
+}

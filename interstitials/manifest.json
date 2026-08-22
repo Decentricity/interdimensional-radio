@@ -1,0 +1,530 @@
+{
+  "generated_at": "2026-08-22T05:54:56.555423+00:00",
+  "items": [
+    {
+      "id": "ads/voice/01-ghost-internet.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/01-ghost-internet.txt",
+      "audio": "audio/ads/voice/01-ghost-internet.wav",
+      "text": "Ghost Internet Plus \u2014 so fast your regrets arrive early. One free timeline. Sign up now.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/voice/02-chrono-courier.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/02-chrono-courier.txt",
+      "audio": "audio/ads/voice/02-chrono-courier.wav",
+      "text": "Chrono Courier \u2014 we deliver to yesterday. Late fees may apply across centuries.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/voice/03-mirror-insurance.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/03-mirror-insurance.txt",
+      "audio": "audio/ads/voice/03-mirror-insurance.wav",
+      "text": "Mirror Insurance \u2014 your reflection has been making financial decisions. Reflect responsibly.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/voice/04-gourmet-mealworms.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/04-gourmet-mealworms.txt",
+      "audio": "audio/ads/voice/04-gourmet-mealworms.wav",
+      "text": "Gourmet Mealworms \u2014 farm-to-tongue for discerning reptiles. Find us on Route 9.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/voice/05-paradox-pizza.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/05-paradox-pizza.txt",
+      "audio": "audio/ads/voice/05-paradox-pizza.wav",
+      "text": "Paradox Pizza \u2014 arrives before you order. Still hungry. Taste the loop.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/voice/06-void-warranty.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/06-void-warranty.txt",
+      "audio": "audio/ads/voice/06-void-warranty.wav",
+      "text": "Void Warranty \u2014 for when physics took a personal day. Sympathetic technician included.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/voice/07-sleep-pod-rentals.txt",
+      "kind": "ads",
+      "style": "voice",
+      "script": "scripts/ads/07-sleep-pod-rentals.txt",
+      "audio": "audio/ads/voice/07-sleep-pod-rentals.wav",
+      "text": "Sleep Pod Rentals \u2014 nap through the apocalypse. Wake up legally distinct from your clone.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/jingle/01-ghost-internet.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/01-ghost-internet.txt",
+      "audio": "audio/ads/jingle/01-ghost-internet.wav",
+      "text": "Ghost Internet Plus \u2014 so fast your regrets arrive early. One free timeline. Sign up now.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/jingle/02-chrono-courier.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/02-chrono-courier.txt",
+      "audio": "audio/ads/jingle/02-chrono-courier.wav",
+      "text": "Chrono Courier \u2014 we deliver to yesterday. Late fees may apply across centuries.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/jingle/03-mirror-insurance.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/03-mirror-insurance.txt",
+      "audio": "audio/ads/jingle/03-mirror-insurance.wav",
+      "text": "Mirror Insurance \u2014 your reflection has been making financial decisions. Reflect responsibly.",
+      "bytes": 1763406
+    },
+    {
+      "id": "ads/jingle/04-gourmet-mealworms.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/04-gourmet-mealworms.txt",
+      "audio": "audio/ads/jingle/04-gourmet-mealworms.wav",
+      "text": "Gourmet Mealworms \u2014 farm-to-tongue for discerning reptiles. Find us on Route 9.",
+      "bytes": 3420238
+    },
+    {
+      "id": "ads/jingle/05-paradox-pizza.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/05-paradox-pizza.txt",
+      "audio": "audio/ads/jingle/05-paradox-pizza.wav",
+      "text": "Paradox Pizza \u2014 arrives before you order. Still hungry. Taste the loop.",
+      "bytes": 1232974
+    },
+    {
+      "id": "ads/jingle/06-void-warranty.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/06-void-warranty.txt",
+      "audio": "audio/ads/jingle/06-void-warranty.wav",
+      "text": "Void Warranty \u2014 for when physics took a personal day. Sympathetic technician included.",
+      "bytes": 3878990
+    },
+    {
+      "id": "ads/jingle/07-sleep-pod-rentals.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/07-sleep-pod-rentals.txt",
+      "audio": "audio/ads/jingle/07-sleep-pod-rentals.wav",
+      "text": "Sleep Pod Rentals \u2014 nap through the apocalypse. Wake up legally distinct from your clone.",
+      "bytes": 3526734
+    },
+    {
+      "id": "ads/jingle/08-quantum-dental.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/08-quantum-dental.txt",
+      "audio": "audio/ads/jingle/08-quantum-dental.wav",
+      "text": "Quantum Dental \u2014 teeth in superposition until observed. We collapse the cavity.",
+      "bytes": 2115662
+    },
+    {
+      "id": "ads/jingle/09-rent-a-grandma.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/09-rent-a-grandma.txt",
+      "audio": "audio/ads/jingle/09-rent-a-grandma.wav",
+      "text": "Rent-A-Grandma \u2014 warm advice, hard cookies, loving judgment. Hourly rates available.",
+      "bytes": 2115662
+    },
+    {
+      "id": "ads/jingle/10-lost-socks-hotline.txt",
+      "kind": "ads",
+      "style": "jingle",
+      "script": "scripts/ads/10-lost-socks-hotline.txt",
+      "audio": "audio/ads/jingle/10-lost-socks-hotline.wav",
+      "text": "Lost Socks Hotline \u2014 reuniting partners since never. Call 1-800-WHERE-SOCK.",
+      "bytes": 2115662
+    },
+    {
+      "id": "station-id/voice/01-interdimensional-radio.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/01-interdimensional-radio.txt",
+      "audio": "audio/station-id/voice/01-interdimensional-radio.wav",
+      "text": "You're on Interdimensional Radio \u2014 broadcasting from somewhere between here and elsewhere. Stay tuned.",
+      "bytes": 1466446
+    },
+    {
+      "id": "station-id/voice/03-signal-skip.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/03-signal-skip.txt",
+      "audio": "audio/station-id/voice/03-signal-skip.wav",
+      "text": "Interdimensional Radio \u2014 for when the playlist knows something you don't. Keep listening.",
+      "bytes": 1763406
+    },
+    {
+      "id": "station-id/voice/04-home-of-songs.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/04-home-of-songs.txt",
+      "audio": "audio/station-id/voice/04-home-of-songs.wav",
+      "text": "You're on Interdimensional Radio, where the B-sides outrank the headliners. Home of the almost-famous.",
+      "bytes": 1763406
+    },
+    {
+      "id": "station-id/voice/05-transmitting-static.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/05-transmitting-static.txt",
+      "audio": "audio/station-id/voice/05-transmitting-static.wav",
+      "text": "Interdimensional Radio, live from the booth at the end of the hall. Door locked, speakers on.",
+      "bytes": 1763406
+    },
+    {
+      "id": "station-id/voice/06-call-letters.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/06-call-letters.txt",
+      "audio": "audio/station-id/voice/06-call-letters.wav",
+      "text": "IDR \u2014 Interdimensional Radio. Like a mixtape from a stranger who got your taste exactly right.",
+      "bytes": 1763406
+    },
+    {
+      "id": "station-id/voice/07-idr-live.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/07-idr-live.txt",
+      "audio": "audio/station-id/voice/07-idr-live.wav",
+      "text": "This is Interdimensional Radio, coming in hot off the reel-to-reel and straight to your ears. Tape's still warm.",
+      "bytes": 1763406
+    },
+    {
+      "id": "station-id/voice/08-already-elsewhere.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/08-already-elsewhere.txt",
+      "audio": "audio/station-id/voice/08-already-elsewhere.wav",
+      "text": "Interdimensional Radio: the station your ex's roommate said you'd hate. You didn't.",
+      "bytes": 1706062
+    },
+    {
+      "id": "station-id/voice/09-only-station.txt",
+      "kind": "station-id",
+      "style": "voice",
+      "script": "scripts/station-id/09-only-station.txt",
+      "audio": "audio/station-id/voice/09-only-station.wav",
+      "text": "Interdimensional Radio \u2014 deep cuts, wrong turns, and songs that age like good vinegar.",
+      "bytes": 1763406
+    },
+    {
+      "id": "station-id/jingle/01-interdimensional-radio.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/01-interdimensional-radio.txt",
+      "audio": "audio/station-id/jingle/01-interdimensional-radio.wav",
+      "text": "You're on Interdimensional Radio \u2014 broadcasting from somewhere between here and elsewhere. Stay tuned.",
+      "bytes": 1396814
+    },
+    {
+      "id": "station-id/jingle/02-between-frequencies.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/02-between-frequencies.txt",
+      "audio": "audio/station-id/jingle/02-between-frequencies.wav",
+      "text": "This is Interdimensional Radio on your dial. All genres, no map, no curfew. IDR.",
+      "bytes": 1396814
+    },
+    {
+      "id": "station-id/jingle/03-signal-skip.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/03-signal-skip.txt",
+      "audio": "audio/station-id/jingle/03-signal-skip.wav",
+      "text": "Interdimensional Radio \u2014 for when the playlist knows something you don't. Keep listening.",
+      "bytes": 1304654
+    },
+    {
+      "id": "station-id/jingle/04-home-of-songs.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/04-home-of-songs.txt",
+      "audio": "audio/station-id/jingle/04-home-of-songs.wav",
+      "text": "You're on Interdimensional Radio, where the B-sides outrank the headliners. Home of the almost-famous.",
+      "bytes": 1396814
+    },
+    {
+      "id": "station-id/jingle/05-transmitting-static.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/05-transmitting-static.txt",
+      "audio": "audio/station-id/jingle/05-transmitting-static.wav",
+      "text": "Interdimensional Radio, live from the booth at the end of the hall. Door locked, speakers on.",
+      "bytes": 1550414
+    },
+    {
+      "id": "station-id/jingle/06-call-letters.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/06-call-letters.txt",
+      "audio": "audio/station-id/jingle/06-call-letters.wav",
+      "text": "IDR \u2014 Interdimensional Radio. Like a mixtape from a stranger who got your taste exactly right.",
+      "bytes": 1550414
+    },
+    {
+      "id": "station-id/jingle/07-idr-live.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/07-idr-live.txt",
+      "audio": "audio/station-id/jingle/07-idr-live.wav",
+      "text": "This is Interdimensional Radio, coming in hot off the reel-to-reel and straight to your ears. Tape's still warm.",
+      "bytes": 1706062
+    },
+    {
+      "id": "station-id/jingle/08-already-elsewhere.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/08-already-elsewhere.txt",
+      "audio": "audio/station-id/jingle/08-already-elsewhere.wav",
+      "text": "Interdimensional Radio: the station your ex's roommate said you'd hate. You didn't.",
+      "bytes": 1232974
+    },
+    {
+      "id": "station-id/jingle/09-only-station.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/09-only-station.txt",
+      "audio": "audio/station-id/jingle/09-only-station.wav",
+      "text": "Interdimensional Radio \u2014 deep cuts, wrong turns, and songs that age like good vinegar.",
+      "bytes": 1396814
+    },
+    {
+      "id": "station-id/jingle/10-turn-it-up.txt",
+      "kind": "station-id",
+      "style": "jingle",
+      "script": "scripts/station-id/10-turn-it-up.txt",
+      "audio": "audio/station-id/jingle/10-turn-it-up.wav",
+      "text": "Interdimensional Radio \u2014 home of Miss Hedgey Hog, our little pink hedgehog mascot. Turn it up.",
+      "bytes": 1550414
+    },
+    {
+      "id": "dj-chatter/voice-female/01-three-chords-prophecy.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/01-three-chords-prophecy.txt",
+      "audio": "audio/dj-chatter/01-three-chords-prophecy.wav",
+      "text": "That last one had three chords and a prophecy. Next track's compiling \u2014 try not to blink.",
+      "bytes": 1515598,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-alien/02-timeline-shift.txt",
+      "kind": "dj-chatter",
+      "style": "voice-alien",
+      "script": "scripts/dj-chatter/02-timeline-shift.txt",
+      "audio": "audio/dj-chatter/02-timeline-shift.wav",
+      "text": "If your foot just tapped without permission, that was the last song, not a medical event.",
+      "bytes": 1445966,
+      "dj_gender": "alien"
+    },
+    {
+      "id": "dj-chatter/voice-male/03-bass-drop-weather.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/03-bass-drop-weather.txt",
+      "audio": "audio/dj-chatter/03-bass-drop-weather.wav",
+      "text": "Coming up: something with a chorus big enough to embarrass you in public. Worth it, I think.",
+      "bytes": 1515598,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-female/04-reflection-harmonizing.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/04-reflection-harmonizing.txt",
+      "audio": "audio/dj-chatter/04-reflection-harmonizing.wav",
+      "text": "Quick reminder: if your reflection starts harmonizing, that's a you problem. Songs back in a moment.",
+      "bytes": 1445966,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-alien/05-vibes-in-mail.txt",
+      "kind": "dj-chatter",
+      "style": "voice-alien",
+      "script": "scripts/dj-chatter/05-vibes-in-mail.txt",
+      "audio": "audio/dj-chatter/05-vibes-in-mail.wav",
+      "text": "Next track's still rendering, but the vibes are already in the mail. Appreciate your patience.",
+      "bytes": 1374286,
+      "dj_gender": "alien"
+    },
+    {
+      "id": "dj-chatter/voice-male/06-no-requests-warnings.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/06-no-requests-warnings.txt",
+      "audio": "audio/dj-chatter/06-no-requests-warnings.wav",
+      "text": "We don't do requests at Interdimensional Radio. We do warnings. Next song's warming up.",
+      "bytes": 1284174,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-female/07-mistakes-remix.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/07-mistakes-remix.txt",
+      "audio": "audio/dj-chatter/07-mistakes-remix.wav",
+      "text": "Somewhere a DJ is remixing your mistakes. Here, we just queue the next banger.",
+      "bytes": 1284174,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-male/08-signal-check.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/08-signal-check.txt",
+      "audio": "audio/dj-chatter/08-signal-check.wav",
+      "text": "Sound check: one hundred percent volume, zero percent explanation. Next track loading.",
+      "bytes": 1142862,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-alien/09-portal-normal.txt",
+      "kind": "dj-chatter",
+      "style": "voice-alien",
+      "script": "scripts/dj-chatter/09-portal-normal.txt",
+      "audio": "audio/dj-chatter/09-portal-normal.wav",
+      "text": "That last song tried to open a portal. Maintenance says that's normal. Hang tight.",
+      "bytes": 1284174,
+      "dj_gender": "alien"
+    },
+    {
+      "id": "dj-chatter/voice-female/10-synchronized.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/10-synchronized.txt",
+      "audio": "audio/dj-chatter/10-synchronized.wav",
+      "text": "If you're hearing this, you're synchronized. The next song is almost through customs.",
+      "bytes": 1212494,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-male/11-future-setlist.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/11-future-setlist.txt",
+      "audio": "audio/dj-chatter/11-future-setlist.wav",
+      "text": "I've seen the future setlist. I'm not allowed to say it's good. But it is loud.",
+      "bytes": 1445966,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-alien/12-weather-report.txt",
+      "kind": "dj-chatter",
+      "style": "voice-alien",
+      "script": "scripts/dj-chatter/12-weather-report.txt",
+      "audio": "audio/dj-chatter/12-weather-report.wav",
+      "text": "Traffic report: emotional congestion on the bridge, clearing after the chorus. Drive your feelings responsibly.",
+      "bytes": 1374286,
+      "dj_gender": "alien"
+    },
+    {
+      "id": "dj-chatter/voice-female/13-algorithm-violence.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/13-algorithm-violence.txt",
+      "audio": "audio/dj-chatter/13-algorithm-violence.wav",
+      "text": "The algorithm is thinking. It chose violence. And a key change. Stand by.",
+      "bytes": 1212494,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-male/14-legal-listening.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/14-legal-listening.txt",
+      "audio": "audio/dj-chatter/14-legal-listening.wav",
+      "text": "You are now legally listening to Interdimensional Radio. Side effect: humming at inappropriate times.",
+      "bytes": 1284174,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-alien/15-gap-not-silence.txt",
+      "kind": "dj-chatter",
+      "style": "voice-alien",
+      "script": "scripts/dj-chatter/15-gap-not-silence.txt",
+      "audio": "audio/dj-chatter/15-gap-not-silence.wav",
+      "text": "That gap? Not silence. The next song is knitting itself from spare frequencies.",
+      "bytes": 1212494,
+      "dj_gender": "alien"
+    },
+    {
+      "id": "dj-chatter/voice-female/16-void-sponsorship.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/16-void-sponsorship.txt",
+      "audio": "audio/dj-chatter/16-void-sponsorship.wav",
+      "text": "We play songs the way other stations play ads \u2014 constantly, and with questionable sponsorship from the void.",
+      "bytes": 1587278,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-male/17-cold-coffee.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/17-cold-coffee.txt",
+      "audio": "audio/dj-chatter/17-cold-coffee.wav",
+      "text": "Coffee went cold during that bridge? Sympathies. Next track runs hot.",
+      "bytes": 1071182,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-alien/18-between-verses.txt",
+      "kind": "dj-chatter",
+      "style": "voice-alien",
+      "script": "scripts/dj-chatter/18-between-verses.txt",
+      "audio": "audio/dj-chatter/18-between-verses.wav",
+      "text": "Broadcasting from the space between verses. Next song ETA: soonish.",
+      "bytes": 1001550,
+      "dj_gender": "alien"
+    },
+    {
+      "id": "dj-chatter/voice-female/19-universe-throat.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/19-universe-throat.txt",
+      "audio": "audio/dj-chatter/19-universe-throat.wav",
+      "text": "Every interstitial is the universe clearing its throat. Ahem. Song incoming.",
+      "bytes": 1071182,
+      "dj_gender": "female"
+    },
+    {
+      "id": "dj-chatter/voice-male/20-escaped-preproduction.txt",
+      "kind": "dj-chatter",
+      "style": "voice-male",
+      "script": "scripts/dj-chatter/20-escaped-preproduction.txt",
+      "audio": "audio/dj-chatter/20-escaped-preproduction.wav",
+      "text": "Stay with us \u2014 the next track escaped pre-production and is running down the hall toward your speakers.",
+      "bytes": 1587278,
+      "dj_gender": "male"
+    },
+    {
+      "id": "dj-chatter/voice-female/21-mascot-cart.txt",
+      "kind": "dj-chatter",
+      "style": "voice-female",
+      "script": "scripts/dj-chatter/21-mascot-cart.txt",
+      "audio": "audio/dj-chatter/21-mascot-cart.wav",
+      "text": "Miss Hedgey Hog knocked the cart over again. Anyway \u2014 next song's almost ready.",
+      "bytes": 1284174,
+      "dj_gender": "female"
+    }
+  ]
+}

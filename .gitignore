@@ -1,0 +1,29 @@
+# Runtime / local state
+.radio-staging/
+.comfy-warm.pid
+.comfy-warm-lock.pid
+.comfy-warm.log
+.radio-run.log
+.radio-test*.log
+
+# Generated audio (keep structure via .gitkeep)
+library/**/*.wav
+library/quarantine/
+interstitials/audio/**/*.wav
+interstitials/generation*.log
+output/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Secrets
+*.key
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+*.swp
+*~

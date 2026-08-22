@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Random shuffle of interstitial library with end fade to hide model tail glitches.
+set -euo pipefail
+
+ROOT="${HOME}/music/interstitials/audio"
+FADE_MAX="${FADE_MAX:-2.0}"   # seconds
+TMP="${TMPDIR:-/tmp}/idr-play-$$"
+PLAYLIST="${1:-}"
+
+mkdir -p "$TMP"
+cleanup() { rm -rf "$TMP"; }
+trap cleanup EXIT
+
+mapfile -t files < <(find "$ROOT" -name '*.wav' | sort)
+if ((${#files[@]} == 0)); then
+  echo "No interstitial WAVs under $ROOT" >&2
+  exit 1
+fi
+
+if [[ -z "$PLAYLIST" ]]; then
+  PLAYLIST="$TMP/order.txt"
+  printf '%s\n' "${files[@]}" | shuf >"$PLAYLIST"
+else
+  cp "$PLAYLIST" "$TMP/order.txt"
+  PLAYLIST="$TMP/order.txt"
+fi
+
+echo "Playing $(wc -l <"$PLAYLIST") clips (fade out up to ${FADE_MAX}s at tail)"
+n=0
+while IFS= read -r src; do
+  [[ -f "$src" ]] || continue
+  n=$((n + 1))
+  rel="${src#${HOME}/music/interstitials/audio/}"
+  dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$src")
+  fade=$(python3 - <<PY
+dur = float("$dur")
+fade_max = float("$FADE_MAX")
+fade = min(fade_max, max(0.35, dur * 0.22))
+start = max(0.0, dur - fade)
+print(f"{start:.3f}:{fade:.3f}")
+PY
+)
+  out="$TMP/$(printf '%03d' "$n").wav"
+  echo "[$n] $rel (${dur}s, fade@${fade})"
+  ffmpeg -y -loglevel error -i "$src" -af "afade=t=out:st=${fade%:*}:d=${fade#*:}" "$out"
+  pw-play "$out" 2>/dev/null || aplay -q "$out"
+done <"$PLAYLIST"
+
+echo "Done — $n clips. Order saved in $PLAYLIST"
+cp "$PLAYLIST" "${HOME}/music/interstitials/last-shuffle.txt"
