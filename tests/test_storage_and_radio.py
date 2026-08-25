@@ -33,6 +33,40 @@ class StorageTests(unittest.TestCase):
 
 
 class RadioStateMachineTests(unittest.TestCase):
+    def test_blank_library_continues_interstitials_without_false_track_log(self) -> None:
+        song = Path("/tmp/generated-song.wav")
+
+        class FakeGenerator:
+            is_ready = False
+
+            def ready(self) -> bool:
+                return self.is_ready
+
+            def result(self) -> Path:
+                return song
+
+        gen = FakeGenerator()
+
+        def no_library_song(*_args: object) -> None:
+            gen.is_ready = True
+            return None
+
+        with tempfile.TemporaryDirectory() as raw_home:
+            cfg = radio.Config(Path(raw_home))
+            with (
+                mock.patch.object(radio, "play_interstitial_phase", return_value=None),
+                mock.patch.object(
+                    radio, "play_library_song_fill", side_effect=no_library_song
+                ),
+                mock.patch.object(radio, "log") as log,
+            ):
+                _last, result = radio.play_wait_session(gen, cfg, Path(raw_home))
+        self.assertEqual(result, song)
+        log.assert_any_call(
+            f"interstitials hit {radio.INTERSTITIAL_FILL_MAX_S:.0f}s — "
+            "no library track yet; continuing interstitials"
+        )
+
     def test_slow_generations_do_not_recurse(self) -> None:
         song = Path("/tmp/generated-song.wav")
 
@@ -85,7 +119,7 @@ class RadioStateMachineTests(unittest.TestCase):
                 mock.patch.object(radio, "stop_playback") as stop,
                 mock.patch.object(radio, "ensure_catalog_hashes"),
                 mock.patch.object(radio, "import_staging_songs", return_value=0),
-                mock.patch.object(radio, "cleanup_staging"),
+                mock.patch.object(radio, "cleanup_staging") as cleanup,
                 mock.patch.object(radio, "bootstrap_first_song", side_effect=KeyboardInterrupt),
                 mock.patch.object(radio, "log"),
             ):
@@ -93,6 +127,7 @@ class RadioStateMachineTests(unittest.TestCase):
             self.assertEqual(result, 130)
             release.assert_called_once()
             self.assertGreaterEqual(stop.call_count, 2)
+            self.assertEqual(cleanup.call_count, 2)
 
 
 if __name__ == "__main__":

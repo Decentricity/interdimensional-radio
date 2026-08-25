@@ -674,13 +674,14 @@ def play_wait_session(gen: SongGenerator, cfg: Config, tmp: Path) -> tuple[Path 
         last = play_interstitial_phase(gen, cfg, tmp)
         if gen.ready():
             break
-        log(
-            f"interstitials hit {INTERSTITIAL_FILL_MAX_S:.0f}s — "
-            "playing a full library track while generating"
-        )
         library_last = play_library_song_fill(gen, cfg, tmp)
         if library_last is not None:
             last = library_last
+        else:
+            log(
+                f"interstitials hit {INTERSTITIAL_FILL_MAX_S:.0f}s — "
+                "no library track yet; continuing interstitials"
+            )
         if gen.ready():
             break
     return last, gen.result()
@@ -751,6 +752,10 @@ def run(
         return 1
     finally:
         stop_playback()
+        try:
+            cleanup_staging(cfg)
+        except OSError as exc:
+            log(f"warning: could not prune staging during shutdown: {exc}")
         release_radio_lock()
 
 
