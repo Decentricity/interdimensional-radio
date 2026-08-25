@@ -230,7 +230,12 @@ def generate_interstitials(
             print(f"\n=== {label} ===", flush=True)
         seed = interstitial_gen.SEED_BASE[(kind, "voice")] + i
         interstitial_gen.generate_voice_clip(
-            script, out_wav, kind=kind, seed=seed, verbose=verbose
+            script,
+            out_wav,
+            home=home,
+            kind=kind,
+            seed=seed,
+            verbose=verbose,
         )
         if verbose or not quiet:
             print(f"Playing {out_wav.name}…", flush=True)

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
-from airadio import __version__, radio, song_title
+from airadio import __version__, interstitial_provenance, radio, song_title
 from airadio.paths import user_home
 
 
@@ -59,6 +60,24 @@ def _build_parser() -> argparse.ArgumentParser:
     title_p.add_argument("--count", type=int, default=1)
     title_p.add_argument("--seed", type=int)
 
+    interstitials_p = sub.add_parser(
+        "interstitials", help="inspect and audit interstitial provenance"
+    )
+    interstitial_commands = interstitials_p.add_subparsers(
+        dest="interstitial_command", required=True
+    )
+    info_p = interstitial_commands.add_parser(
+        "info", help="show the generation record for a WAV"
+    )
+    info_p.add_argument("audio", type=Path)
+    lyrics_p = interstitial_commands.add_parser(
+        "lyrics", help="print the exact lyrics used to generate a WAV"
+    )
+    lyrics_p.add_argument("audio", type=Path)
+    interstitial_commands.add_parser(
+        "audit", help="verify every interstitial against its provenance hashes"
+    )
+
     return parser
 
 
@@ -95,6 +114,33 @@ def main(argv: list[str] | None = None) -> int:
         for _ in range(args.count):
             print(song_title.random_title(rng))
         return 0
+    if command == "interstitials":
+        home = user_home()
+        if args.interstitial_command in ("info", "lyrics"):
+            try:
+                audio = interstitial_provenance.resolve_audio(home, args.audio)
+                if args.interstitial_command == "info":
+                    print(
+                        json.dumps(
+                            interstitial_provenance.load_record(audio), indent=2
+                        )
+                    )
+                else:
+                    print(interstitial_provenance.read_lyrics(audio), end="")
+            except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+                parser.error(str(exc))
+            return 0
+        if args.interstitial_command == "audit":
+            issues = interstitial_provenance.audit(home)
+            audio_root = home / "interstitials" / "audio"
+            total = sum(1 for _ in audio_root.rglob("*.wav")) if audio_root.is_dir() else 0
+            if issues:
+                for issue in issues:
+                    print(f"FAIL {issue.audio}: {issue.problem}")
+                print(f"Audit failed: {len(issues)} issue(s) across {total} WAV(s).")
+                return 1
+            print(f"Audit passed: {total} WAV(s) have verified provenance.")
+            return 0
     parser.print_help()
     return 1
 

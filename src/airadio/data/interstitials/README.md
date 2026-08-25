@@ -1,5 +1,10 @@
 # Interdimensional Radio — prerecorded interstitials
 
+Airadio records new clips with neighboring `.lyrics.txt` and
+`.provenance.json` files plus append-only history under
+`interstitials/provenance/`. Use `airadio interstitials lyrics`, `info`, or
+`audit` to inspect and verify them.
+
 Short clips played when the next song is still generating.
 
 **Mascot:** Miss Hedgey Hog — a little pink hedgehog. Station mascot only, **not** the DJ or announcer. See [BRAND.md](BRAND.md).

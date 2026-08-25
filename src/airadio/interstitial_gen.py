@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import uuid
 from pathlib import Path
 
-from airadio import music3
+from airadio import interstitial_provenance, music3
 from airadio.paths import bundled_interstitials_dir
 
 SEED_BASE = {
@@ -38,6 +39,7 @@ def generate_voice_clip(
     script: Path,
     out_wav: Path,
     *,
+    home: Path,
     kind: str,
     seed: int,
     verbose: bool = True,
@@ -47,16 +49,37 @@ def generate_voice_clip(
     work = out_wav.parent / ".work"
     work.mkdir(parents=True, exist_ok=True)
     lyrics = work / f"{script.stem}.lyrics.txt"
-    lyrics.write_text(f"[verse]\n{text}\n", encoding="utf-8")
+    lyrics_text = f"[verse]\n{text}\n"
+    lyrics.write_text(lyrics_text, encoding="utf-8")
+    duration = int(duration_for_text(text, kind=kind))
+    temporary = work / f".{out_wav.name}.{uuid.uuid4().hex}.tmp.wav"
     if verbose:
         print(f"  script: {text[:72]}{'…' if len(text) > 72 else ''}", flush=True)
-    music3.generate(
-        lyrics=lyrics,
-        caption=caption,
-        duration=int(duration_for_text(text, kind=kind)),
-        seed=seed,
-        out=out_wav,
-        play=False,
-        verbose=verbose,
-    )
+    try:
+        music3.generate(
+            lyrics=lyrics,
+            caption=caption,
+            duration=duration,
+            seed=seed,
+            out=temporary,
+            play=False,
+            verbose=verbose,
+        )
+        if not temporary.is_file() or temporary.stat().st_size == 0:
+            raise RuntimeError(f"Music3 did not produce audio for {script}")
+        temporary.replace(out_wav)
+        interstitial_provenance.record_generation(
+            home,
+            out_wav,
+            lyrics=lyrics_text,
+            kind=kind,
+            style="voice",
+            backend="minimax-music3",
+            source_script=script,
+            caption=caption,
+            seed=seed,
+            duration_s=duration,
+        )
+    finally:
+        temporary.unlink(missing_ok=True)
     return out_wav

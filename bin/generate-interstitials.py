@@ -3,16 +3,24 @@
 
 from __future__ import annotations
 
+import json
 import random
 import shutil
 import subprocess
 import sys
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+from airadio import interstitial_provenance, music3
 
 ROOT = Path("/home/decentricity/music/interstitials")
 SCRIPTS = ROOT / "scripts"
 AUDIO = ROOT / "audio"
+RUNTIME_HOME = AUDIO.resolve().parents[1]
 PROMPTS = ROOT / "prompts"
 CAPTIONS = {
     ("ads", "voice"): PROMPTS / "voice-only.caption.txt",
@@ -33,14 +41,6 @@ DJ_CAPTIONS = {
 }
 DJ_GENDERS_FILE = ROOT / "dj-genders.json"
 DJ_GENDER_CHOICES = ("male", "female", "alien")
-
-
-def warm_cmd(*parts: str) -> list[str]:
-    if shutil.which("airadio"):
-        return ["airadio", "music3", *parts]
-    script = Path(__file__).resolve().parent / "music3-warm"
-    return [str(script), *parts]
-
 
 PIPER_BIN = Path("/home/decentricity/companion-ai/.venv/bin/piper")
 PIPER_VOICE_DIR = Path.home() / ".local/share/companion-ai/piper-voices"
@@ -101,23 +101,36 @@ def music3_generate(
     work = PROMPTS / "work"
     work.mkdir(parents=True, exist_ok=True)
     lyrics = work / f"{kind}-{style}-{script.stem}.lyrics.txt"
-    lyrics.write_text(f"[verse]\n{text}\n")
-    run(
-        warm_cmd(
-            "gen",
-            "--lyrics",
-            str(lyrics),
-            "--prompt",
-            str(caption),
-            "--duration",
-            str(duration_for_text(text, kind=kind, style=style)),
-            "--seed",
-            str(seed),
-            "--out",
-            str(out_wav),
-            "--no-play",
+    lyrics_text = f"[verse]\n{text}\n"
+    lyrics.write_text(lyrics_text)
+    duration = int(round(duration_for_text(text, kind=kind, style=style)))
+    temporary = out_wav.parent / f".{out_wav.name}.{uuid.uuid4().hex}.tmp.wav"
+    try:
+        music3.generate(
+            lyrics=lyrics,
+            caption=caption,
+            duration=duration,
+            seed=seed,
+            out=temporary,
+            play=False,
+            verbose=True,
         )
-    )
+        temporary.replace(out_wav)
+        interstitial_provenance.record_generation(
+            RUNTIME_HOME,
+            out_wav.resolve(),
+            lyrics=lyrics_text,
+            kind=kind,
+            style=style,
+            backend="minimax-music3",
+            source_script=script,
+            caption=caption,
+            seed=seed,
+            duration_s=duration,
+            gender=dj_gender or ("female" if female else None),
+        )
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def piper_generate(script: Path, out_wav: Path) -> None:
@@ -127,26 +140,41 @@ def piper_generate(script: Path, out_wav: Path) -> None:
         raise RuntimeError("piper not found")
     if not PIPER_VOICE.is_file():
         raise RuntimeError(f"piper voice missing: {PIPER_VOICE}")
-    proc = subprocess.run(
-        [
-            piper,
-            "-m",
-            str(PIPER_VOICE),
-            "-f",
-            str(out_wav),
-            "--data-dir",
-            str(PIPER_VOICE_DIR),
-            "--length_scale",
-            "1.0",
-            "--volume",
-            "1.0",
-        ],
-        input=text,
-        text=True,
-        capture_output=True,
+    temporary = out_wav.parent / f".{out_wav.name}.{uuid.uuid4().hex}.tmp.wav"
+    try:
+        proc = subprocess.run(
+            [
+                piper,
+                "-m",
+                str(PIPER_VOICE),
+                "-f",
+                str(temporary),
+                "--data-dir",
+                str(PIPER_VOICE_DIR),
+                "--length_scale",
+                "1.0",
+                "--volume",
+                "1.0",
+            ],
+            input=text,
+            text=True,
+            capture_output=True,
+        )
+        if proc.returncode != 0 or not temporary.is_file():
+            raise RuntimeError(f"piper failed for {script.name}: {proc.stderr}")
+        temporary.replace(out_wav)
+    finally:
+        temporary.unlink(missing_ok=True)
+    interstitial_provenance.record_generation(
+        RUNTIME_HOME,
+        out_wav.resolve(),
+        lyrics=text,
+        kind="dj-chatter",
+        style="piper",
+        backend="piper",
+        source_script=script,
+        extra={"voice_model": str(PIPER_VOICE)},
     )
-    if proc.returncode != 0 or not out_wav.is_file():
-        raise RuntimeError(f"piper failed for {script.name}: {proc.stderr.decode()}")
 
 
 def load_dj_genders(*, reshuffle: bool = False) -> dict[str, str]:
@@ -255,6 +283,16 @@ def batch_dj_music3(*, manifest: dict, skip_existing: bool, reshuffle_genders: b
         piper_copy = backup / f"{script.stem}.piper.wav"
         if out.is_file() and not piper_copy.is_file():
             shutil.copy2(out, piper_copy)
+            interstitial_provenance.record_generation(
+                RUNTIME_HOME,
+                piper_copy.resolve(),
+                lyrics=script.read_text().strip(),
+                kind="dj-chatter",
+                style="piper-backup",
+                backend="piper",
+                source_script=script,
+                evidence="copied from the prior Piper take before Music3 replacement",
+            )
         print(f"\n=== dj-chatter/{gender} {script.name} -> {out.name} ===", flush=True)
         music3_generate(
             script,
@@ -345,11 +383,11 @@ def main() -> int:
     manifest = rebuild_manifest_from_disk()
 
     if mode in ("piper",):
-        subprocess.run(warm_cmd("stop"), check=False)
         batch_piper(manifest=manifest, skip_existing=skip_existing)
 
     if mode in ("dj-music3",):
-        run(warm_cmd("start"))
+        if not music3.require_ready():
+            return 1
         batch_dj_music3(
             manifest=manifest,
             skip_existing=skip_existing,
@@ -385,7 +423,8 @@ def main() -> int:
     }
 
     if mode in music3_batches:
-        run(warm_cmd("start"))
+        if not music3.require_ready():
+            return 1
         for kind, style in music3_batches[mode]:
             batch_music3(
                 kind,

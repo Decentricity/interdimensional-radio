@@ -23,6 +23,18 @@ class CliParserTests(unittest.TestCase):
         parsed = _build_parser().parse_args(["run", "--home", "/tmp/example-station"])
         self.assertEqual(parsed.home, Path("/tmp/example-station"))
 
+    def test_interstitial_provenance_commands_parse(self) -> None:
+        info = _build_parser().parse_args(
+            ["interstitials", "info", "audio/ads/voice/example.wav"]
+        )
+        lyrics = _build_parser().parse_args(
+            ["interstitials", "lyrics", "example.wav"]
+        )
+        audit = _build_parser().parse_args(["interstitials", "audit"])
+        self.assertEqual(info.interstitial_command, "info")
+        self.assertEqual(lyrics.interstitial_command, "lyrics")
+        self.assertEqual(audit.interstitial_command, "audit")
+
 
 if __name__ == "__main__":
     unittest.main()

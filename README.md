@@ -76,6 +76,9 @@ airadio
 | `airadio` | Start the radio loop |
 | `airadio run` | Same as above |
 | `airadio title` | Print random two-word song titles |
+| `airadio interstitials lyrics CLIP.wav` | Print the exact input lyrics for an interstitial |
+| `airadio interstitials info CLIP.wav` | Show its generation parameters and hashes |
+| `airadio interstitials audit` | Verify all current clips and archived generations |
 
 ## How it works
 
@@ -97,6 +100,22 @@ airadio
 Generation retries transient failures up to three times. Ctrl-C stops playback,
 releases the station lock, and exits cleanly. Catalog and lyric-state updates use
 atomic file replacement so an interrupted write cannot leave half-written JSON.
+
+### Interstitial provenance
+
+Every newly generated interstitial is committed with the exact lyrics supplied
+to the local model. Beside each playable WAV, Airadio stores a human-readable
+`.lyrics.txt` file and a `.provenance.json` record containing hashes, source
+script, caption, seed, requested duration, backend, and generation time.
+
+Successful generations are append-only. An independent copy of each WAV and
+its inputs lives under `interstitials/provenance/history/`, so regenerating a
+clip does not erase its earlier audio or script. The atomic
+`interstitials/provenance/catalog.json` identifies the current generation and
+the complete history for every filename.
+
+The recorded lyrics are the exact input supplied to Music3 or Piper. A local
+audio model can still mispronounce, slur, or improvise what is heard in the WAV.
 
 ## Hardware
 
