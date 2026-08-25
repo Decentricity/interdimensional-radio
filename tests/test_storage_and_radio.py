@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -33,6 +34,44 @@ class StorageTests(unittest.TestCase):
 
 
 class RadioStateMachineTests(unittest.TestCase):
+    def test_song_generator_always_reserves_and_archives_vocal_lyrics(self) -> None:
+        reservation = types.SimpleNamespace(
+            text="[verse]\nA complete lyric",
+            lyric_id=42,
+            sha256="a" * 64,
+        )
+        with tempfile.TemporaryDirectory() as raw_home:
+            cfg = radio.Config(Path(raw_home))
+            generated = cfg.library / "generated.wav"
+
+            def generate(**kwargs: object) -> None:
+                Path(kwargs["out"]).write_bytes(b"generated")
+
+            with (
+                mock.patch.object(radio.song_title, "random_title", return_value="Copper Echo"),
+                mock.patch.object(
+                    radio.lyricist, "reserve_lyrics", return_value=reservation
+                ) as reserve,
+                mock.patch.object(radio.music3, "generate", side_effect=generate),
+                mock.patch.object(radio, "archive_song", return_value=generated) as archive,
+                mock.patch.object(radio, "cleanup_staging"),
+                mock.patch.object(radio, "log"),
+            ):
+                generator = radio.SongGenerator(cfg)
+                generator._run()
+
+            reserve.assert_called_once_with(cfg.home, "Copper Echo")
+            self.assertEqual(
+                archive.call_args.kwargs,
+                {
+                    "seed": generator._seed - 1,
+                    "title": "Copper Echo",
+                    "instrumental": False,
+                    "lyric_id": 42,
+                    "lyrics_hash": "a" * 64,
+                },
+            )
+
     def test_blank_library_continues_interstitials_without_false_track_log(self) -> None:
         song = Path("/tmp/generated-song.wav")
 

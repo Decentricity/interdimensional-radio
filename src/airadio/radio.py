@@ -55,10 +55,6 @@ class Config:
         self.catalog = self.library / "catalog.json"
         self.playback = self.staging / "playback"
         self.caption = prompts_dir() / "normie-control.caption.txt"
-        self.instrumental_caption = prompts_dir() / "normie-control.caption.instrumental.txt"
-        self.instrumental_lyrics = (
-            prompts_dir() / "normie-control.lyrics.instrumental.template.txt"
-        )
         self.lyrics_grammar = lyricist.grammar_path()
 
 
@@ -273,31 +269,22 @@ class SongGenerator:
         self._seed += 1
         self._started_at = time.time()
         title = song_title.random_title()
-        instrumental = song_title.roll_instrumental()
         try:
-            reservation = None if instrumental else lyricist.reserve_lyrics(cfg.home, title)
+            reservation = lyricist.reserve_lyrics(cfg.home, title)
         except Exception as exc:  # noqa: BLE001
             self._error = GenerationError(seed, 0, exc, stage="preparation")
             log(f"could not reserve unique lyrics: {exc}")
             self._ready.set()
             return
-        lyric_id = reservation.lyric_id if reservation is not None else None
         self._title = title
-        kind = "instrumental" if instrumental else "vocal"
-        log(f'generation started (seed {seed}, title "{title}", {kind})')
+        log(f'generation started (seed {seed}, title "{title}", vocal)')
         prompt_dir = cfg.staging / "prompts"
         prompt_dir.mkdir(parents=True, exist_ok=True)
         stamp = int(time.time() * 1000)
         caption_path = prompt_dir / f"caption-{stamp}.txt"
         lyrics_path = prompt_dir / f"lyrics-{stamp}.txt"
-        caption_path.write_text(
-            song_title.build_caption(title, instrumental=instrumental), encoding="utf-8"
-        )
-        lyrics = (
-            song_title.build_lyrics(title, instrumental=True)
-            if instrumental
-            else reservation.text
-        )
+        caption_path.write_text(song_title.build_caption(title), encoding="utf-8")
+        lyrics = reservation.text
         lyrics_path.write_text(lyrics, encoding="utf-8")
         last_error: BaseException | None = None
         for attempt in range(1, GENERATION_MAX_ATTEMPTS + 1):
@@ -340,9 +327,9 @@ class SongGenerator:
                 out,
                 seed=seed,
                 title=title,
-                instrumental=instrumental,
-                lyric_id=lyric_id,
-                lyrics_hash=(reservation.sha256 if reservation is not None else None),
+                instrumental=False,
+                lyric_id=reservation.lyric_id,
+                lyrics_hash=reservation.sha256,
             )
             self._path = archived
             if archived.resolve() != out.resolve():
@@ -712,8 +699,6 @@ def run(
             return 0
     required_generation_data = (
         cfg.caption,
-        cfg.instrumental_caption,
-        cfg.instrumental_lyrics,
         cfg.lyrics_grammar,
     )
     missing = [path for path in required_generation_data if not path.is_file()]

@@ -20,6 +20,12 @@ recursive phrase grammar to compose new lines and new song forms. A persistent
 station-local lyric ID and complete-text hash prevent a finished lyric from
 being selected again across restarts.
 
+Airadio currently generates vocal songs only. The released local Music 3
+weights do not provide a reliable track-level instrumental control: tag-only
+requests can add wordless vocals or collapse into incoherent audio. Airadio
+therefore does not label those outputs as instrumentals and has no hosted-API
+fallback; generation stays on your self-hosted ComfyUI instance.
+
 ## What you need
 
 1. **ComfyUI** running locally (default `http://127.0.0.1:8188`)
