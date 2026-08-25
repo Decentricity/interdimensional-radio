@@ -72,6 +72,10 @@ class LyricistTests(unittest.TestCase):
         self.assertNotEqual(first, second)
         self.assertIn("l00000007", first)
 
+    def test_instrumental_uses_one_native_section_tag(self) -> None:
+        lyrics = song_title.build_lyrics("Copper Echo", instrumental=True)
+        self.assertEqual(lyrics, "[instrumental]")
+
     def test_reservation_persists_id_and_full_text_hash(self) -> None:
         with tempfile.TemporaryDirectory() as raw_home:
             home = Path(raw_home)
