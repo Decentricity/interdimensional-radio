@@ -15,7 +15,10 @@ airadio
 ```
 
 Each new song gets a random two-word title that primes generation and becomes
-the filename (`velvet-garden4289.wav`).
+part of the filename (`velvet-garden4289-l00000428.wav`). Vocal songs use a
+recursive phrase grammar to compose new lines and new song forms. A persistent
+station-local lyric ID and complete-text hash prevent a finished lyric from
+being selected again across restarts.
 
 ## What you need
 
@@ -85,6 +88,10 @@ airadio
 3. **Fill** — if gen is not ready: interstitials, then a library track; repeat.
 4. **Archive** — finished songs land in `library/` with catalog metadata.
 
+Generation retries transient failures up to three times. Ctrl-C stops playback,
+releases the station lock, and exits cleanly. Catalog and lyric-state updates use
+atomic file replacement so an interrupted write cannot leave half-written JSON.
+
 ## Hardware
 
 Tested on **NVIDIA GeForce RTX 4070 Ti (12 GB VRAM)** with the **INT8** MiniMax
@@ -99,14 +106,22 @@ Music 3 weights (~11 GB on disk; ~10–11 GB VRAM for a 120s generation).
 | `AIRADIO_COMFY_HOST` | `127.0.0.1` | ComfyUI host |
 | `AIRADIO_COMFY_PORT` | `8188` | ComfyUI port |
 | `AIRADIO_PROMPTS` | bundled package prompts | Override prompt directory |
+| `AIRADIO_LYRICS_GRAMMAR` | bundled recursive grammar | Override the lyric grammar JSON |
+| `AIRADIO_STAGING_KEEP` | `20` | Diagnostic prompt, failed-output, and playback files retained per kind |
 
 ## Prompts and titles
 
 Bundled under the package:
 
-- Caption / lyrics templates for generation
+- Caption templates and a recursive phrase-level lyric grammar
 - Title word lists for two-word song names
 - Interstitial scripts and prompts
+
+The lyric grammar follows the recursive symbol/rules approach demonstrated by
+[Galaxy Kate's Tracery](https://github.com/galaxykate/tracery/tree/tracery2):
+small phrase symbols expand into lines, song-scoped symbols keep imagery
+consistent, and a separate grammar chooses the complete song form. Airadio uses
+a small Python-native expander for this subset rather than requiring JavaScript.
 
 ## License
 

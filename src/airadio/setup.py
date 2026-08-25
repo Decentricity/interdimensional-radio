@@ -11,6 +11,7 @@ from pathlib import Path
 
 from airadio import interstitial_gen, music3
 from airadio.paths import bundled_interstitials_dir, ensure_user_layout, user_home
+from airadio.storage import atomic_write_json
 
 MIN_LIBRARY_S = 30.0
 
@@ -35,19 +36,15 @@ def load_config(home: Path) -> dict | None:
 
 
 def save_config(home: Path, cfg: SetupConfig) -> None:
-    config_path(home).write_text(
-        json.dumps(
-            {
-                "radio_name": cfg.radio_name,
-                "call_letters": cfg.call_letters,
-                "ad_count": cfg.ad_count,
-                "station_id_count": cfg.station_id_count,
-                "setup_at": datetime.now(timezone.utc).isoformat(),
-            },
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
+    atomic_write_json(
+        config_path(home),
+        {
+            "radio_name": cfg.radio_name,
+            "call_letters": cfg.call_letters,
+            "ad_count": cfg.ad_count,
+            "station_id_count": cfg.station_id_count,
+            "setup_at": datetime.now(timezone.utc).isoformat(),
+        },
     )
 
 
@@ -108,12 +105,11 @@ def count_library_songs(home: Path) -> int:
 
 
 def is_ready(home: Path | None = None) -> bool:
-    """True when at least one ad, station ID, and library song exist."""
+    """True when station setup assets exist; a first song may still be pending."""
     root = home or user_home()
     return (
         count_interstitials(root, "ads") >= 1
         and count_interstitials(root, "station-id") >= 1
-        and count_library_songs(root) >= 1
     )
 
 

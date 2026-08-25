@@ -7,6 +7,7 @@ import random
 import re
 from pathlib import Path
 
+from airadio import lyricist
 from airadio.paths import prompts_dir
 
 INSTRUMENTAL_CHANCE = 5  # 1 in N songs
@@ -37,8 +38,9 @@ def title_slug(title: str) -> str:
     return slug or "untitled"
 
 
-def song_filename(title: str, seed: int) -> str:
-    return f"{title_slug(title)}{seed}.wav"
+def song_filename(title: str, seed: int, lyric_id: int | None = None) -> str:
+    suffix = f"-l{lyric_id:08d}" if lyric_id is not None else ""
+    return f"{title_slug(title)}{seed}{suffix}.wav"
 
 
 def split_title(title: str) -> tuple[str, str]:
@@ -77,16 +79,23 @@ def build_caption(title: str, *, instrumental: bool = False, base_path: Path | N
     )
 
 
-def build_lyrics(title: str, *, instrumental: bool = False, template_path: Path | None = None) -> str:
+def build_lyrics(
+    title: str,
+    *,
+    instrumental: bool = False,
+    lyric_id: int | None = None,
+    template_path: Path | None = None,
+) -> str:
     if instrumental:
         path = template_path or _prompt("normie-control.lyrics.instrumental.template.txt")
         return path.read_text(encoding="utf-8").strip()
-    word1, word2 = split_title(title)
-    template = (template_path or _prompt("normie-control.lyrics.template.txt")).read_text(
-        encoding="utf-8"
-    )
-    return template.format(
-        title=title,
-        word1=word1.lower(),
-        word2=word2.lower(),
-    )
+    if template_path is not None:
+        word1, word2 = split_title(title)
+        return template_path.read_text(encoding="utf-8").format(
+            title=title,
+            word1=word1.lower(),
+            word2=word2.lower(),
+        )
+    if lyric_id is None:
+        raise ValueError("vocal lyrics require a reserved lyric_id")
+    return lyricist.compose_lyrics(title, lyric_id)
